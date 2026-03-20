@@ -1,23 +1,18 @@
-from rest_framework import viewsets, permissions
-from ..models import Complaint
-from .serializers import ComplaintSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from ..models import Notification
 
-class ComplaintViewSet(viewsets.ModelViewSet):
-    queryset = Complaint.objects.all()
-    serializer_class = ComplaintSerializer
-    permission_classes = [permissions.IsAuthenticated]
+@api_view(['GET'])
+def user_notifications(request):
+    notifications = Notification.objects.filter(user=request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    data = [
+        {
+            "message": n.message,
+            "is_read": n.is_read,
+            "created_at": n.created_at
+        }
+        for n in notifications
+    ]
 
-    def get_queryset(self):
-        user = self.request.user
-
-        # 🔥 Role-based data filtering
-        if user.role == 'citizen':
-            return Complaint.objects.filter(user=user)
-
-        elif user.role == 'officer':
-            return Complaint.objects.all()
-
-        return Complaint.objects.all()
+    return Response(data)

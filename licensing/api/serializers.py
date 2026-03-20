@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from ..models import Complaint
+from ..models import LicenseApplication
 
-class ComplaintSerializer(serializers.ModelSerializer):
+class LicenseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Complaint
+        model = LicenseApplication
         fields = '__all__'
-        read_only_fields = ['user', 'status', 'created_at']
+        read_only_fields = ['user', 'status']
