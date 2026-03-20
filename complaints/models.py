@@ -3,13 +3,6 @@ from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
-class ComplaintCategory(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
 class Complaint(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -40,6 +33,15 @@ class Complaint(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    priority = models.CharField(
+    max_length=10,
+    choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High')],
+    default='medium'
+    )
+
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    sla_hours = models.IntegerField(default=48)
 
     def __str__(self):
         return self.title
@@ -50,6 +52,7 @@ class ComplaintUpdate(models.Model):
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
 
     def __str__(self):
         return f"Update for {self.complaint.id}"
