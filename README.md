@@ -97,3 +97,48 @@ External Integrations (Simulated)
 ```bash
 git clone [https://github.com//bocra-digital-platform](https://github.com/TechBusters-B/bocra-digital-platform).git
 cd bocra-digital-platform
+```
+### 2.Create Virtual Environment
+python -m venv venv
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate     # Windows
+### 3. Install Dependencies
+pip install -r requirements.txt
+### 4. Run Migrations
+python manage.py migrate
+### 5. Create Superuser
+python manage.py createsuperuser
+### 6. Run Server
+python manage.py runserver
+### 📚 API Documentation
+
+Swagger UI available at:
+
+http://127.0.0.1:8000/swagger/
+### 🚀 Future Enhancements
+
+📱 Mobile app integration
+
+🤖 AI chatbot for user support
+
+📍 Geo-tagged complaints
+
+📊 Advanced QoS analytics (real telecom data)
+
+🔔 Notification system (email/SMS)
+
+### 🏆 Hackathon Value Proposition
+
+This project goes beyond a traditional website by delivering:
+
+A fully integrated regulatory system
+
+Data-driven decision support
+
+Scalable API-first architecture
+
+Improved citizen engagement and transparency
+
+### 👨‍💻 Author
+
+Developed as part of a hackathon to modernize regulatory digital infrastructure.
