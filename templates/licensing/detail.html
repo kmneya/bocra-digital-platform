@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Application Tracking</h2>
+
+<div class="card p-4 shadow-sm">
+
+    <h4>{{ application.business_name }}</h4>
+    <p class="text-muted">Submitted on {{ application.created_at }}</p>
+
+    <!-- 🔥 STATUS BADGE -->
+    <span class="badge 
+        {% if application.status == 'approved' %}bg-success
+        {% elif application.status == 'rejected' %}bg-danger
+        {% else %}bg-warning{% endif %}">
+        {{ application.status|title }}
+    </span>
+
+    <!-- 🔥 PROGRESS BAR -->
+    <div class="progress mt-4" style="height: 25px;">
+        <div class="progress-bar 
+            {% if application.status == 'approved' %}bg-success
+            {% elif application.status == 'rejected' %}bg-danger
+            {% else %}bg-info{% endif %}"
+            style="width: 
+                {% if application.status == 'pending' %}33%
+                {% elif application.status == 'under_review' %}66%
+                {% elif application.status == 'approved' %}100%
+                {% elif application.status == 'rejected' %}100%
+                {% endif %};">
+            {{ application.status|title }}
+        </div>
+    </div>
+
+    <!-- 🔥 TIMELINE -->
+    <div class="mt-4">
+        <ul class="list-group">
+            <li class="list-group-item">
+                ✅ Submitted
+            </li>
+
+            <li class="list-group-item 
+                {% if application.status == 'pending' %}text-muted{% endif %}">
+                🔍 Under Review
+            </li>
+
+            <li class="list-group-item 
+                {% if application.status != 'approved' %}text-muted{% endif %}">
+                🎉 Approved
+            </li>
+        </ul>
+    </div>
+
+    <!-- 🔥 REVIEW INFO -->
+    {% if application.reviewed_by %}
+    <div class="mt-4">
+        <h5>Review Details</h5>
+        <p><strong>Reviewed By:</strong> {{ application.reviewed_by }}</p>
+        <p><strong>Date:</strong> {{ application.reviewed_at }}</p>
+        <p><strong>Notes:</strong> {{ application.review_notes }}</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

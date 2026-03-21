@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Select License Type</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label>Select License</label>
+        <select name="license_type" class="form-select">
+            <option value="">-- Select --</option>
+            <option value="aircraft_radio">Aircraft Radio License</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Continue</button>
+</form>
+{% endblock %}
+
+<script>
+document.getElementById("license_type").addEventListener("change", function() {
+    let value = this.value;
+    let formDiv = document.getElementById("dynamic-form");
+
+    if (value === "aircraft_radio") {
+        formDiv.innerHTML = `
+            <h4 class="mt-4">Aircraft Radio License Details</h4>
+
+            <input name="name" class="form-control mb-2" placeholder="Applicant Name">
+            <input name="nationality" class="form-control mb-2" placeholder="Nationality">
+            <input name="email" class="form-control mb-2" placeholder="Email">
+
+            <h5 class="mt-3">Base Station</h5>
+            <input name="station_name" class="form-control mb-2" placeholder="Station Name">
+            <input name="city" class="form-control mb-2" placeholder="City">
+
+            <h5 class="mt-3">Equipment</h5>
+            <input name="equipment_type" class="form-control mb-2" placeholder="Equipment Type">
+            <input name="model" class="form-control mb-2" placeholder="Model">
+        `;
+    } else {
+        formDiv.innerHTML = "";
+    }
+});
+</script>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Aircraft Radio License Application</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <h4>Applicant Details</h4>
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Nationality</label>
+        <input name="nationality" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input name="email" class="form-control">
+    </div>
+
+    <h4 class="mt-4">Base Station</h4>
+
+    <div class="mb-3">
+        <label>Station Name</label>
+        <input name="station_name" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>City</label>
+        <input name="city" class="form-control">
+    </div>
+
+    <h4 class="mt-4">Equipment</h4>
+
+    <div class="mb-3">
+        <label>Equipment Type</label>
+        <input name="equipment_type" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>Model</label>
+        <input name="model" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">
+        Submit Application
+    </button>
+</form>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-md-6 mx-auto">
+    <div class="card p-4 shadow-sm">
+        <h3 class="mb-3 text-center">Create Account</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.phone_number.label_tag }}
+                {{ form.phone_number }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+            </div>
+
+            <button class="btn btn-primary w-100">Register</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            Already have an account? <a href="/login/">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

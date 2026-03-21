@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<!-- 🔷 HERO SECTION -->
+<div class="text-center mb-5">
+    <img src="{% static 'images/bocra_logo.png' %}" width="200" class="mb-3">
+
+    <h1 class="fw-bold">BOCRA Digital Platform</h1>
+    <p class="text-muted">
+        Empowering Botswana through modern digital communication services.
+    </p>
+    <div class="row text-center mb-5">
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0">
+            <div style="width:20px;height:20px;background-color:#007bff;margin:auto;border-radius:50%;"></div>
+            <h5 class="mt-2">Telecommunications</h5>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0">
+            <div style="width:20px;height:20px;background-color:#28a745;margin:auto;border-radius:50%;"></div>
+            <h5 class="mt-2">Broadcasting</h5>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0">
+            <div style="width:20px;height:20px;background-color:#d63384;margin:auto;border-radius:50%;"></div>
+            <h5 class="mt-2">Postal Services</h5>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm border-0">
+            <div style="width:20px;height:20px;background-color:#ffc107;margin:auto;border-radius:50%;"></div>
+            <h5 class="mt-2">Internet Services</h5>
+        </div>
+    </div>
+
+</div>
+
+---
+
+<!-- 🧠 ABOUT SECTION -->
+<div class="container mt-5">
+
+    <h2 class="mb-4 text-center">About BOCRA</h2>
+
+    <!-- Profile -->
+    <div class="card p-4 mb-4 shadow-sm">
+        <h4>Profile</h4>
+        <p>
+            Botswana Communications Regulatory Authority (BOCRA) was established through the Communications Regulatory Authority Act, 2012 and began operations on 1 April 2013.
+        </p>
+        <p>
+            It regulates telecommunications, broadcasting, postal services, internet, and ICTs, creating a unified authority for Botswana’s communications sector.
+        </p>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm h-100">
+                <h4>Mission</h4>
+                <p>
+                    To regulate the communications sector for the promotion of competition, innovation, consumer protection and universal access.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-4 shadow-sm h-100">
+                <h4>Vision</h4>
+                <p>
+                    A connected and digitally driven society.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+---
+
+<!-- ⚙️ SERVICES -->
+<div class="row text-center">
+
+    <!-- Complaints -->
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm h-100">
+            <h4>📢 Complaints</h4>
+            <p>Report issues with telecom and internet services.</p>
+            <a href="/complaints/create/" class="btn btn-outline-primary">Submit Complaint</a>
+        </div>
+    </div>
+
+    <!-- Licensing -->
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm h-100">
+            <h4>📄 Licensing</h4>
+            <p>Apply for communication and broadcasting licenses.</p>
+            <a href="/licenses/" class="btn btn-outline-success">Apply for License</a>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="col-md-4">
+        <div class="card p-4 shadow-sm h-100">
+            <h4>📊 Dashboard</h4>
+            <p>Track complaints and license applications in real-time.</p>
+            <a href="/dashboard/citizen/" class="btn btn-outline-dark">View Dashboard</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
