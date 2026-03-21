@@ -19,6 +19,7 @@ from django.urls import path,include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from .views import home
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -32,9 +33,11 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),
+    path('', home, name='home'),
+    path('auth/', include('users.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('complaints/', include('complaints.urls')),
+    path('licenses/', include('licensing.urls')),
     #Api
     path('api/', include('complaints.api.urls')),
     path('api/dashboard/', include('dashboard.api.urls')),

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">My License Applications</h2>
+
+<table class="table table-hover shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Business</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Track</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.name }}</td>
+            <td>
+                <span class="badge 
+                    {% if app.status == 'approved' %}bg-success
+                    {% elif app.status == 'rejected' %}bg-danger
+                    {% else %}bg-warning{% endif %}">
+                    {{ app.status }}
+                </span>
+            </td>
+            <td>{{ app.created_at }}</td>
+            <td>
+                <a href="{% url 'license_detail' app.id %}" class="btn btn-sm btn-primary">
+                    View
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

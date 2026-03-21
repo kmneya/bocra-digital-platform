@@ -1,30 +1,30 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth.views import LoginView
+from django.shortcuts import render, redirect
+from .forms import CitizenRegistrationForm
+from django.contrib.auth import login
 
-def login_view(request):
+def register(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        form = CitizenRegistrationForm(request.POST)
 
-        user = authenticate(request, username=username, password=password)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = 'citizen'  # 🔥 force role
+            user.save()
 
-        if user is not None:
-            login(request, user)
+            login(request, user)  # auto login after register
 
-            # 🔥 Role-based redirect
-            if user.role == 'admin':
-                return redirect('admin_dashboard')
-            elif user.role == 'officer':
-                return redirect('officer_dashboard')
-            else:
-                return redirect('citizen_dashboard')
-        else:
-            messages.error(request, "Invalid credentials")
+            return redirect('citizen_dashboard')
 
-    return render(request, 'users/login.html')
+    else:
+        form = CitizenRegistrationForm()
+
+    return render(request, 'users/register.html', {'form': form})
 
 
-def logout_view(request):
-    logout(request)
-    return redirect('login')
+
+class UserLoginView(LoginView):
+    template_name = 'users/login.html'
