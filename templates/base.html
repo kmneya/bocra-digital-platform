@@ -2,41 +2,391 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOCRA Digital Platform</title>
-
-    <!-- Bootstrap -->
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Custom Colors - Botswana Theme */
+        :root {
+            --bocra-sky: #87CEEB;
+            --bocra-sky-light: #a8dbff;
+            --bocra-sky-dark: #6bb5d6;
+            --bocra-dark: #35393d;
+            --bocra-black: #000000;
+            --bocra-white: #ffffff;
+            --bocra-gray: #f8f9fa;
+        }
+        
+        body {
+            background-color: var(--bocra-gray);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+            padding: 1rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--bocra-dark) !important;
+            font-size: 1.6rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Enhanced Navigation */
+        .navbar-nav {
+            gap: 0.5rem;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--bocra-dark) !important;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--bocra-dark) !important;
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .nav-link.active {
+            background-color: white;
+            color: var(--bocra-dark) !important;
+        }
+        
+        .navbar-nav .btn-outline-dark {
+            color: var(--bocra-dark);
+            border-color: var(--bocra-dark);
+            border-radius: 25px;
+            padding: 8px 20px;
+            margin-left: 10px;
+        }
+        
+        .navbar-nav .btn-outline-dark:hover {
+            background-color: var(--bocra-dark);
+            color: white;
+        }
+        
+        .navbar-nav .btn-primary {
+            background-color: var(--bocra-dark);
+            border-color: var(--bocra-dark);
+            border-radius: 25px;
+            padding: 8px 20px;
+            margin-left: 10px;
+        }
+        
+        .navbar-nav .btn-primary:hover {
+            background-color: #2c3e50;
+            transform: translateY(-2px);
+        }
+        
+        /* Dropdown Menu */
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-item {
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--bocra-sky);
+            color: var(--bocra-dark);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .service-card {
+            text-align: center;
+            padding: 2rem;
+            cursor: pointer;
+        }
+        
+        .service-card i {
+            font-size: 3rem;
+            color: var(--bocra-sky-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .service-card h5 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--bocra-dark);
+            color: var(--bocra-white);
+            margin-top: 50px;
+            padding: 40px 0 20px;
+        }
+        
+        footer a {
+            color: var(--bocra-sky);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: white;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Search Bar */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .search-container .input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .search-container input {
+            border: none;
+            padding: 12px 20px;
+        }
+        
+        .search-container button {
+            background-color: var(--bocra-dark);
+            border: none;
+            padding: 12px 25px;
+        }
+        
+        .btn-primary {
+            background-color: var(--bocra-sky-dark);
+            border-color: var(--bocra-sky-dark);
+            color: var(--bocra-dark);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--bocra-sky);
+            border-color: var(--bocra-sky);
+        }
+
+        /* Hero Section with Background Image */
+.hero-section {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.92) 0%, rgba(107, 181, 214, 0.92) 100%), 
+                url('/static/images/law.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    padding: 80px 0;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.officer-hero {
+    background: linear-gradient(135deg, rgba(135, 206, 235, 0.95) 0%, rgba(107, 181, 214, 0.95) 100%), 
+                url('/static/images/regulation.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 300px;
+}
+    </style>
 </head>
 <body>
 
-<!-- 🔝 Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">BOCRA Platform</a>
-
-        <div>
-        {% if user.is_authenticated %}
-            <a href="/dashboard/citizen/" class="btn btn-outline-light me-2">Dashboard</a>
-
-            <a href="/licenses/" class="btn btn-outline-light me-2">Licenses</a>
-
-            <a href="/documents/" class="btn btn-outline-light me-2">Documents</a>
-
-            <a href="/auth/logout/" class="btn btn-danger">Logout</a>
-        {% else %}
-            <a class="btn btn-outline-light me-2" href="/documents/">Documents</a>
-
-            <a href="/auth/login/" class="btn btn-outline-light">Login</a>
-
-            <a href="/auth/register/" class="btn btn-success">Register</a>
-        {% endif %}
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/static/images/bocra-logo.png" alt="BOCRA Logo" onerror="this.src='https://via.placeholder.com/40x40?text=B'">
+            BOCRA
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="bocra_portal/">Bocra Portal</a></li>
+                        <li><a class="dropdown-item" href="/services/broadcasting/">Tenders</a></li>
+                        <li><a class="dropdown-item" href="/services/postal/">Qos Monitoring</a></li>
+                        <li><a class="dropdown-item" href="/services/internet/">Register Bw</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/licenses/apply">Apply for License</a></li>
+                        <li><a class="dropdown-item" href="/complaints/create/">Submit Complaint</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/documents/">Documents</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about/">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact/">Contact</a>
+                </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/redirect-dashboard/">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <li class="nav-item">
+                        <form method="POST" action="/auth/logout/" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-dark" href="/auth/login/">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="/auth/register/">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </nav>
 
-<!-- 📦 Content -->
-<div class="container mt-4">
+<!-- Main Content -->
+<main>
     {% block content %}{% endblock %}
-</div>
+</main>
 
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5><i class="fas fa-broadcast-tower me-2"></i>BOCRA</h5>
+                <p>Botswana Communications Regulatory Authority</p>
+                <p><small>Regulating communications for a connected Botswana</small></p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/complaints/create/"><i class="fas fa-exclamation-circle me-2"></i>Submit Complaint</a></li>
+                    <li><a href="/licenses/apply"><i class="fas fa-file-alt me-2"></i>Apply for License</a></li>
+                    <li><a href="/documents/"><i class="fas fa-book me-2"></i>Regulatory Documents</a></li>
+                    <li><a href="/type-approval/"><i class="fas fa-check-circle me-2"></i>Type Approval</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Contact Us</h5>
+                <p class="text-white-50">
+                    <i class="fas fa-map-marker-alt me-2"></i>Gaborone, Botswana<br>
+                    <i class="fas fa-phone me-2"></i>+267 123 4567<br>
+                    <i class="fas fa-envelope me-2"></i>info@bocra.org.bw
+                </p>
+                <div class="mt-2">
+                    <a href="#" class="text-white-50 me-3"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white-50 me-3"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white-50"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="bg-white-50">
+        <div class="text-center">
+            <small>&copy; 2024 BOCRA Digital Platform. All rights reserved.</small>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.card, .service-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

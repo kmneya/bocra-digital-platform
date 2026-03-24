@@ -1,28 +1,355 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h2>Officer Dashboard</h2>
+<!-- Officer Hero Section with Background -->
+<div class="hero-section officer-hero">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-3">Regulatory Intelligence Dashboard</h1>
+                <p class="lead mb-0">Welcome back, {{ user.get_full_name|default:user.username }}</p>
+                <p class="small">Real-time analytics and compliance monitoring</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<table class="table table-striped mt-3">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for complaint in complaints %}
-        <tr>
-            <td>{{ complaint.title }}</td>
-            <td>{{ complaint.status }}</td>
-            <td>{{ complaint.priority }}</td>
-            <td>
-                <a href="#" class="btn btn-sm btn-primary">Update</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+<div class="container">
+    <!-- KPI Cards with Icons -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-tasks fa-3x mb-3"></i>
+                    <h5>Total Complaints</h5>
+                    <h2 class="stat-number">{{ total_complaints }}</h2>
+                    <small class="text-muted">All time</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                    <h5>Resolution Rate</h5>
+                    <h2 class="stat-number">{{ resolution_rate }}%</h2>
+                    <div class="progress mt-2" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: {{ resolution_rate }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-hourglass-half fa-3x mb-3"></i>
+                    <h5>Pending</h5>
+                    <h2 class="stat-number">{{ pending }}</h2>
+                    <small class="text-muted">Awaiting action</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-file-alt fa-3x mb-3"></i>
+                    <h5>Licenses Pending</h5>
+                    <h2 class="stat-number">{{ pending_licenses }}</h2>
+                    <small class="text-muted">Under review</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Advanced Analytics Row -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Complaints by Category</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Trend Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Complaints Trend (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SLA Compliance Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>SLA Compliance</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Complaints resolved within SLA</span>
+                            <span class="fw-bold">{{ sla_compliance }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ sla_compliance }}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Average resolution time</span>
+                            <span class="fw-bold">{{ avg_resolution_time }} hours</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Breached SLA</span>
+                            <span class="fw-bold text-danger">{{ sla_breached }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Performance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Complaints per officer</span>
+                            <span class="fw-bold">{{ complaints_per_officer|default:"12" }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Peak complaint day</span>
+                            <span class="fw-bold">{{ peak_day|default:"Monday" }}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Most common issue</span>
+                            <span class="fw-bold">{{ top_category|default:"Internet Service" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Complaints Table -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Pending Complaints (Requiring Action)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>SLA Status</th>
+                            <th>Submitted</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+                            {% for complaint in pending_complaints_list %}
+                            <tr>
+                                <td>#{{ complaint.id }}</td>
+                                <td>{{ complaint.title|truncatechars:40 }}</td>
+                                <td>{{ complaint.category }}</td>
+                                <td>
+                                    <span class="badge {% if complaint.priority == 'high' %}bg-danger{% elif complaint.priority == 'medium' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ complaint.priority|default:"medium" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if complaint.sla_status == 'breached' %}
+                                        <span class="badge bg-danger">Breached</span>
+                                    {% elif complaint.sla_status == 'within_sla' %}
+                                        <span class="badge bg-success">Within SLA</span>
+                                    {% else %}
+                                        <span class="badge bg-info">In Progress</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="/complaints/{{ complaint.id }}/update-status/" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Update
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                    No pending complaints - great work!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reports & Compliance Section -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-download me-2"></i>Generate Reports</h5>
+                        <div class="d-grid gap-2">
+                            <a href="/reports/complaints/pdf/" class="btn btn-primary btn-sm">
+                                <i class="fas fa-file-pdf"></i> Complaints Report (PDF)
+                            </a>
+                            <a href="/reports/licensing/pdf/" class="btn btn-success btn-sm">
+                                <i class="fas fa-file-pdf"></i> Licensing Report (PDF)
+                            </a>
+                            <a href="/reports/export/csv/" class="btn btn-dark btn-sm">
+                                <i class="fas fa-file-csv"></i> Export All Data (CSV)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-shield-alt me-2"></i>Compliance Monitoring</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-chart-line text-primary me-2"></i>QoS Reports</li>
+                            <li><i class="fas fa-smile text-primary me-2"></i>QoE Surveys</li>
+                            <li><i class="fas fa-lock text-primary me-2"></i>Security Audits</li>
+                            <li><i class="fas fa-tasks text-primary me-2"></i>Type Approval Status</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="fas fa-chart-simple me-2"></i>Quick Stats</h5>
+                        <div class="small">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Complaints this week:</span>
+                                <strong>{{ weekly_complaints|default:"8" }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Licenses approved:</span>
+                                <strong>{{ approved_licenses }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Active officers:</span>
+                                <strong>{{ active_officers|default:"5" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+    
+    {% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryData = {{ complaints_by_category|safe }};
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: categoryData.map(item => item.category__name || 'Uncategorized'),
+                datasets: [{
+                    label: 'Number of Complaints',
+                    data: categoryData.map(item => item.total),
+                    backgroundColor: '#87CEEB',
+                    borderColor: '#1a2a3a',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.raw} complaints` } }
+                }
+            }
+        });
+        
+        // Status Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusData = {{ complaints_by_status|safe }};
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: statusData.map(item => item.status),
+                datasets: [{
+                    data: statusData.map(item => item.total),
+                    backgroundColor: ['#ffc107', '#0d6efd', '#198754', '#dc3545'],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+        
+        // Trend Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        const trendData = {{ complaints_trend|safe }};
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(item => item.date),
+                datasets: [{
+                    label: 'Complaints per Day',
+                    data: trendData.map(item => item.count),
+                    borderColor: '#87CEEB',
+                    backgroundColor: 'rgba(135, 206, 235, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' }
+                }
+            }
+        });
+    </script>
+    {% endblock %}

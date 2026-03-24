@@ -1,37 +1,112 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="mb-4">My License Applications</h2>
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="display-5 fw-bold">My License Applications</h1>
+            <p class="text-muted">Track and manage your license applications</p>
+        </div>
+        <a href="/licenses/apply/" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>Apply for License
+        </a>
+    </div>
+    
+    <!-- Debug info (remove after fixing) -->
+    {% if licenses.count == 0 %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        No license applications found. 
+        {% if request.user.role == 'officer' %}
+            There are no applications in the system yet.
+        {% else %}
+            Click "Apply for License" to start your first application.
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- License Applications Table -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>License Type</th>
+                            <th>Business Name</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+                            {% for license in licenses %}
+                            <tr>
+                                <td class="fw-bold">#{{ license.id }}</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ license.get_license_type_display }}
+                                    </span>
+                                </td>
+                                <td>{{ license.business_name }}</td>
+                                <td>
+                                    {% if license.status == 'approved' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Approved
+                                        </span>
+                                    {% elif license.status == 'rejected' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Rejected
+                                        </span>
+                                    {% elif license.status == 'under_review' %}
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-search me-1"></i>Under Review
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-clock me-1"></i>{{ license.get_status_display }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ license.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="/licenses/{{ license.id }}/" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>Track
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-file-alt fa-4x text-muted mb-3 d-block"></i>
+                                    <h5 class="text-muted">No license applications yet</h5>
+                                    <p class="text-muted">Start your first application today</p>
+                                    <a href="/licenses/apply/" class="btn btn-primary mt-2">
+                                        <i class="fas fa-plus me-2"></i>Apply for License
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<table class="table table-hover shadow-sm">
-    <thead class="table-dark">
-        <tr>
-            <th>Business</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Track</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for app in applications %}
-        <tr>
-            <td>{{ app.name }}</td>
-            <td>
-                <span class="badge 
-                    {% if app.status == 'approved' %}bg-success
-                    {% elif app.status == 'rejected' %}bg-danger
-                    {% else %}bg-warning{% endif %}">
-                    {{ app.status }}
-                </span>
-            </td>
-            <td>{{ app.created_at }}</td>
-            <td>
-                <a href="{% url 'license_detail' app.id %}" class="btn btn-sm btn-primary">
-                    View
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<style>
+    .table td, .table th {
+        vertical-align: middle;
+        padding: 15px;
+    }
+    .table tbody tr:hover {
+        background-color: rgba(135, 206, 235, 0.05);
+    }
+    .badge {
+        padding: 6px 12px;
+        font-weight: 500;
+    }
+</style>
 {% endblock %}

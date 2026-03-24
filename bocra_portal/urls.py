@@ -19,7 +19,8 @@ from django.urls import path,include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-from .views import home
+from .views import home, about, contact
+from users.views import redirect_dashboard
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -35,9 +36,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
     path('auth/', include('users.urls')),
+    path('about/', about, name='about'),
+    path('contact/', contact, name='contact'),
+    path('api/', include('bocra_portal.api_urls')), 
     path('dashboard/', include('dashboard.urls')),
     path('complaints/', include('complaints.urls')),
     path('licenses/', include('licensing.urls')),
+    path('redirect-dashboard/', redirect_dashboard, name='redirect_dashboard'),
     #Api
     path('api/', include('complaints.api.urls')),
     path('api/dashboard/', include('dashboard.api.urls')),

@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
-from .views import ComplaintViewSet
+from .views import LicenseViewSet
 
 router = DefaultRouter()
-router.register(r'complaints', ComplaintViewSet, basename='complaints')
+router.register(r'licenses', LicenseViewSet)
 
 urlpatterns = router.urls
