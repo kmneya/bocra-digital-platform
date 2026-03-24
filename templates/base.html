@@ -247,6 +247,138 @@
     background-position: center;
     min-height: 300px;
 }
+
+/* Side Navigation Styles */
+.sidebar-wrapper {
+    display: flex;
+    min-height: calc(100vh - 72px);
+}
+
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, var(--bocra-dark) 0%, #2c3e50 100%);
+    color: white;
+    transition: all 0.3s ease;
+    position: sticky;
+    top: 72px;
+    height: calc(100vh - 72px);
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+.sidebar-header h5 {
+    margin-bottom: 5px;
+    color: var(--bocra-sky);
+}
+
+.sidebar-header p {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-bottom: 0;
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+}
+
+.nav-section {
+    margin-bottom: 20px;
+}
+
+.nav-section-title {
+    padding: 10px 20px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--bocra-sky);
+    opacity: 0.7;
+}
+
+.sidebar-nav .nav-item {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: rgba(135, 206, 235, 0.1);
+    color: white;
+    border-left-color: var(--bocra-sky);
+    padding-left: 25px;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: rgba(135, 206, 235, 0.15);
+    color: var(--bocra-sky);
+    border-left-color: var(--bocra-sky);
+}
+
+.sidebar-nav .nav-link i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+.sidebar-nav .nav-link .badge {
+    margin-left: auto;
+    background-color: var(--bocra-sky);
+    color: var(--bocra-dark);
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: var(--bocra-gray);
+    min-height: calc(100vh - 72px);
+}
+
+/* Scrollbar styling */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: var(--bocra-sky);
+    border-radius: 3px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .sidebar-wrapper {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+        height: auto;
+    }
+    
+    .main-content {
+        padding: 15px;
+    }
+}
     </style>
 </head>
 <body>

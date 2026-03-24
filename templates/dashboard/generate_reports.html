@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sidebar-wrapper">
+    {% include "includes/sidebar.html" %}
+    <div class="main-content">
+        <h2>Generate Reports</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Complaints Report</h5>
+                        <p>Generate detailed complaint reports</p>
+                        <button class="btn btn-primary">Download PDF</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Licensing Report</h5>
+                        <p>Generate license application reports</p>
+                        <button class="btn btn-primary">Download PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

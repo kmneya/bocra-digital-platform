@@ -1,0 +1,156 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5><i class="fas fa-chart-line me-2"></i>Analytics Hub</h5>
+        <p>Regulatory Intelligence</p>
+    </div>
+    
+    <div class="sidebar-nav">
+        <!-- Dashboard Overview -->
+        <div class="nav-section">
+            <div class="nav-section-title">Overview</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'officer_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'officer_dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Complaints Analytics -->
+        <div class="nav-section">
+            <div class="nav-section-title">Complaints</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'complaints_analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'complaints_analytics' %}active{% endif %}">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Complaints Analytics</span>
+                        <span class="badge">{{ total_complaints|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'pending_complaints' %}" class="nav-link">
+                        <i class="fas fa-clock"></i>
+                        <span>Pending Review</span>
+                        <span class="badge bg-warning">{{ pending_complaints|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'sla_report' %}" class="nav-link">
+                        <i class="fas fa-hourglass-half"></i>
+                        <span>SLA Compliance</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Licensing Analytics -->
+        <div class="nav-section">
+            <div class="nav-section-title">Licensing</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'licensing_analytics' %}" class="nav-link">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Licensing Analytics</span>
+                        <span class="badge">{{ pending_licenses|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'license_list' %}" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        <span>All Applications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'pending_licenses' %}" class="nav-link">
+                        <i class="fas fa-hourglass"></i>
+                        <span>Pending Review</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'approved_licenses' %}" class="nav-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Approved Licenses</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- QoS & Network Monitoring -->
+        <div class="nav-section">
+            <div class="nav-section-title">Network Monitoring</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'network_monitoring' %}" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>QoS Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'spectrum_analysis' %}" class="nav-link">
+                        <i class="fas fa-waveform"></i>
+                        <span>Spectrum Analysis</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'incident_reports' %}" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Incident Reports</span>
+                        <span class="badge bg-danger">{{ active_incidents|default:"0" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'regional_qos' %}" class="nav-link">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Regional QoS</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Reports Section -->
+        <div class="nav-section">
+            <div class="nav-section-title">Reports</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'generate_reports' %}" class="nav-link">
+                        <i class="fas fa-download"></i>
+                        <span>Generate Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'export_data' %}" class="nav-link">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export Data</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'annual_report' %}" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Annual Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Settings -->
+        <div class="nav-section">
+            <div class="nav-section-title">Settings</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'officer_settings' %}" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>Dashboard Settings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'notification_settings' %}" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

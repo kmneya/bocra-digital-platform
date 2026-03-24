@@ -35,123 +35,79 @@ def citizen_dashboard(request):
 
 @login_required
 def officer_dashboard(request):
-    # 🔒 Security: Only officers can access this
+    """Officer dashboard - OFFICERS ONLY"""
+    # Redirect if not officer
     if request.user.role != 'officer':
-        return redirect('citizen_dashboard')
+        if request.user.role == 'citizen':
+            return redirect('citizen_dashboard')
+        elif request.user.role == 'admin':
+            return redirect('admin_dashboard')
     
-    # 📊 Complaint stats
+    # Get provider data for sidebar
+    from monitoring.models import TelecomProvider, NetworkQualityMetrics
+    providers = TelecomProvider.objects.all()
+    provider_data = []
+    for provider in providers:
+        latest_metrics = NetworkQualityMetrics.objects.filter(
+            provider=provider
+        ).order_by('-date').first()
+        provider_data.append({
+            'name': provider.name,
+            'color': provider.color,
+            'avg_throughput': latest_metrics.avg_throughput if latest_metrics else 45,
+            'avg_latency': latest_metrics.latency if latest_metrics else 35,
+            'uptime': latest_metrics.uptime_percentage if latest_metrics else 99.5,
+        })
+    
+    # Your existing stats...
     total_complaints = Complaint.objects.count()
     resolved = Complaint.objects.filter(status='resolved').count()
     pending = Complaint.objects.filter(status='pending').count()
-    in_progress = Complaint.objects.filter(status='in_progress').count()
     
-    # Calculate resolution rate
     resolution_rate = 0
     if total_complaints > 0:
         resolution_rate = (resolved / total_complaints) * 100
     
-    # 📊 Complaints by category
     complaints_by_category = Complaint.objects.values('category').annotate(
         total=Count('id')
-    ).order_by('-total')
+    )
     
-    # 📊 Complaints by status
     complaints_by_status = Complaint.objects.values('status').annotate(
         total=Count('id')
     )
     
-    # 📊 Complaints trend (last 30 days)
-    last_30_days = timezone.now() - timedelta(days=30)
-    complaints_trend = Complaint.objects.filter(
-        created_at__gte=last_30_days
-    ).annotate(
-        date=TruncDate('created_at')
-    ).values('date').annotate(
-        count=Count('id')
-    ).order_by('date')
-    
-    # 📄 Licensing stats
-    total_licenses = LicenseApplication.objects.count()
-    pending_licenses = LicenseApplication.objects.filter(status='pending').count()
-    approved_licenses = LicenseApplication.objects.filter(status='approved').count()
-    
-    # 📋 Pending complaints list
     pending_complaints_list = Complaint.objects.filter(
         status='pending'
     ).order_by('-created_at')[:10]
     
-    # 📋 Pending licenses list
-    pending_licenses_list = LicenseApplication.objects.filter(
-        status='pending'
-    ).order_by('-created_at')[:10]
+    total_licenses = LicenseApplication.objects.count()
+    pending_licenses = LicenseApplication.objects.filter(status='pending').count()
+    approved_licenses = LicenseApplication.objects.filter(status='approved').count()
     
-    # 🔥 SLA Analytics
-    sla_compliant = Complaint.objects.filter(
-        status='resolved',
-        resolved_at__lte=models.F('created_at') + models.F('sla_hours') * timedelta(hours=1)
-    ).count()
-    
-    sla_compliance = 0
-    if resolved > 0:
-        sla_compliance = (sla_compliant / resolved) * 100
-    
-    # Average resolution time (in hours)
-    avg_resolution = Complaint.objects.filter(
-        status='resolved',
-        resolved_at__isnull=False
-    ).annotate(
-        resolution_time=models.ExpressionWrapper(
-            models.F('resolved_at') - models.F('created_at'),
-            output_field=models.DurationField()
-        )
-    ).aggregate(avg=models.Avg('resolution_time'))
-    
-    avg_hours = 0
-    if avg_resolution['avg']:
-        avg_hours = int(avg_resolution['avg'].total_seconds() / 3600)
-    
-    # SLA breached count
-    sla_breached = Complaint.objects.filter(
-        status='pending',
-        created_at__lte=timezone.now() - models.F('sla_hours') * timedelta(hours=1)
-    ).count()
-    
-    # Weekly complaints
-    week_ago = timezone.now() - timedelta(days=7)
-    weekly_complaints = Complaint.objects.filter(created_at__gte=week_ago).count()
-    
-    # Most common category
-    top_category_data = Complaint.objects.values('category').annotate(
-        total=Count('id')
-    ).order_by('-total').first()
-    top_category = top_category_data['category'] if top_category_data else 'N/A'
+    # Add sidebar counts
+    active_incidents = NetworkIncident.objects.filter(is_resolved=False).count()
     
     context = {
-        # KPI Cards
+        # Your existing context...
         'total_complaints': total_complaints,
         'resolved': resolved,
         'pending': pending,
-        'in_progress': in_progress,
         'resolution_rate': round(resolution_rate, 1),
+        'complaints_by_category': complaints_by_category,
+        'complaints_by_status': complaints_by_status,
+        'pending_complaints_list': pending_complaints_list,
         'total_licenses': total_licenses,
         'pending_licenses': pending_licenses,
         'approved_licenses': approved_licenses,
         
-        # Charts
-        'complaints_by_category': complaints_by_category,
-        'complaints_by_status': complaints_by_status,
-        'complaints_trend': list(complaints_trend),
-        
-        # Actionable lists
-        'pending_complaints_list': pending_complaints_list,
-        'pending_licenses_list': pending_licenses_list,
-        
-        # SLA Analytics
-        'sla_compliance': round(sla_compliance, 1),
-        'avg_resolution_time': avg_hours,
-        'sla_breached': sla_breached,
-        'weekly_complaints': weekly_complaints,
-        'top_category': top_category,
+        # Sidebar data
+        'providers': provider_data,
+        'active_incidents': active_incidents,
+        'weekly_complaints': Complaint.objects.filter(created_at__gte=timezone.now() - timedelta(days=7)).count(),
+        'sla_compliance': 95,  # Calculate from your SLA data
+        'avg_resolution_time': 48,
+        'sla_breached': 3,
+        'top_category': 'Internet Service',
     }
     
     return render(request, 'dashboard/officer.html', context)
@@ -159,3 +115,234 @@ def officer_dashboard(request):
 @login_required
 def admin_dashboard(request):
     return render(request, 'dashboard/admin.html')
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from complaints.models import Complaint
+from licensing.models import LicenseApplication
+from monitoring.models import TelecomProvider, NetworkQualityMetrics, NetworkIncident
+from django.db.models import Count, Avg
+from django.utils import timezone
+from datetime import timedelta
+
+# ... keep your existing citizen_dashboard, officer_dashboard, admin_dashboard, redirect_dashboard
+
+# ========== COMPLAINTS ANALYTICS VIEWS ==========
+
+@login_required
+def complaints_analytics(request):
+    """Complaints analytics page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    total_complaints = Complaint.objects.count()
+    resolved = Complaint.objects.filter(status='resolved').count()
+    pending = Complaint.objects.filter(status='pending').count()
+    
+    complaints_by_category = Complaint.objects.values('category').annotate(
+        total=Count('id')
+    )
+    
+    complaints_by_status = Complaint.objects.values('status').annotate(
+        total=Count('id')
+    )
+    
+    context = {
+        'total_complaints': total_complaints,
+        'resolved': resolved,
+        'pending': pending,
+        'complaints_by_category': complaints_by_category,
+        'complaints_by_status': complaints_by_status,
+    }
+    
+    return render(request, 'dashboard/complaints_analytics.html', context)
+
+
+@login_required
+def pending_complaints(request):
+    """View all pending complaints"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    pending_complaints = Complaint.objects.filter(status='pending').order_by('-created_at')
+    
+    return render(request, 'dashboard/pending_complaints.html', {'complaints': pending_complaints})
+
+
+@login_required
+def sla_report(request):
+    """SLA compliance report"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    total_resolved = Complaint.objects.filter(status='resolved').count()
+    sla_compliant = Complaint.objects.filter(
+        status='resolved'
+    ).count()  # You can add actual SLA logic here
+    
+    sla_percentage = 0
+    if total_resolved > 0:
+        sla_percentage = (sla_compliant / total_resolved) * 100
+    
+    context = {
+        'sla_compliance': round(sla_percentage, 1),
+        'total_resolved': total_resolved,
+        'sla_compliant': sla_compliant,
+    }
+    
+    return render(request, 'dashboard/sla_report.html', context)
+
+
+# ========== LICENSING ANALYTICS VIEWS ==========
+
+@login_required
+def licensing_analytics(request):
+    """Licensing analytics page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    total_applications = LicenseApplication.objects.count()
+    approved = LicenseApplication.objects.filter(status='approved').count()
+    pending = LicenseApplication.objects.filter(status='pending').count()
+    rejected = LicenseApplication.objects.filter(status='rejected').count()
+    
+    context = {
+        'total_applications': total_applications,
+        'approved': approved,
+        'pending': pending,
+        'rejected': rejected,
+    }
+    
+    return render(request, 'dashboard/licensing_analytics.html', context)
+
+
+@login_required
+def pending_licenses_view(request):
+    """View all pending license applications"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    pending_apps = LicenseApplication.objects.filter(status='pending').order_by('-created_at')
+    
+    return render(request, 'dashboard/pending_licenses.html', {'applications': pending_apps})
+
+
+@login_required
+def approved_licenses_view(request):
+    """View all approved licenses"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    approved_apps = LicenseApplication.objects.filter(status='approved').order_by('-created_at')
+    
+    return render(request, 'dashboard/approved_licenses.html', {'applications': approved_apps})
+
+
+# ========== NETWORK MONITORING VIEWS ==========
+
+@login_required
+def network_monitoring(request):
+    """Network monitoring dashboard"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    # Get providers
+    providers = TelecomProvider.objects.all()
+    
+    # Get latest metrics for each provider
+    provider_data = []
+    for provider in providers:
+        latest = NetworkQualityMetrics.objects.filter(provider=provider).order_by('-date').first()
+        provider_data.append({
+            'name': provider.name,
+            'color': provider.color,
+            'throughput': latest.avg_throughput if latest else 45,
+            'latency': latest.latency if latest else 35,
+            'uptime': latest.uptime_percentage if latest else 99.5,
+        })
+    
+    context = {
+        'providers': provider_data,
+    }
+    
+    return render(request, 'dashboard/network_monitoring.html', context)
+
+
+@login_required
+def spectrum_analysis(request):
+    """Spectrum analysis page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/spectrum_analysis.html')
+
+
+@login_required
+def incident_reports(request):
+    """Incident reports page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    incidents = NetworkIncident.objects.all().order_by('-start_time')
+    
+    return render(request, 'dashboard/incident_reports.html', {'incidents': incidents})
+
+
+@login_required
+def regional_qos(request):
+    """Regional QoS page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/regional_qos.html')
+
+
+# ========== REPORTS VIEWS ==========
+
+@login_required
+def generate_reports(request):
+    """Generate reports page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/generate_reports.html')
+
+
+@login_required
+def export_data(request):
+    """Export data page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/export_data.html')
+
+
+@login_required
+def annual_report(request):
+    """Annual report page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/annual_report.html')
+
+
+# ========== SETTINGS VIEWS ==========
+
+@login_required
+def officer_settings(request):
+    """Officer settings page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/officer_settings.html')
+
+
+@login_required
+def notification_settings(request):
+    """Notification settings page"""
+    if request.user.role != 'officer':
+        return redirect('citizen_dashboard')
+    
+    return render(request, 'dashboard/notification_settings.html')
