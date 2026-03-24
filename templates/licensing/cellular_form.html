@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4">Cellular License Application</h2>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Site Name</label>
+                            <input type="text" name="site_name" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Site Location</label>
+                            <input type="text" name="site_location" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Equipment Type</label>
+                            <select name="equipment_type" class="form-select" required>
+                                <option value="">Select equipment type</option>
+                                <option value="Base Station">Base Station</option>
+                                <option value="Repeater">Repeater</option>
+                                <option value="Small Cell">Small Cell</option>
+                                <option value="Micro Cell">Micro Cell</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Frequency Band</label>
+                            <select name="frequency_band" class="form-select" required>
+                                <option value="">Select frequency band</option>
+                                <option value="900MHz">900MHz (2G/3G)</option>
+                                <option value="1800MHz">1800MHz (2G/4G)</option>
+                                <option value="2100MHz">2100MHz (3G/4G)</option>
+                                <option value="2600MHz">2600MHz (4G)</option>
+                                <option value="3500MHz">3500MHz (5G)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Service Type</label>
+                            <select name="service_type" class="form-select" required>
+                                <option value="">Select service type</option>
+                                <option value="2G">2G (GSM)</option>
+                                <option value="3G">3G (UMTS)</option>
+                                <option value="4G">4G (LTE)</option>
+                                <option value="5G">5G</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Coverage Area</label>
+                            <textarea name="coverage_area" class="form-control" rows="3" placeholder="Describe the intended coverage area"></textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                Submit Application
+                            </button>
+                            <a href="/licenses/apply/" class="btn btn-outline-secondary">
+                                Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

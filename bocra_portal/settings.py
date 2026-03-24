@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'licensing',
     'dashboard',
     'notification',
+    'corsheaders',
     'rest_framework',
     'drf_yasg',
 ]
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', 
 ]
 
 ROOT_URLCONF = 'bocra_portal.urls'
@@ -125,3 +127,15 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 AUTH_USER_MODEL = 'users.User'
+LOGIN_REDIRECT_URL = '/redirect-dashboard/'
+
+# Configure CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React development server
+]
+
+# Allow credentials (for cookies/auth)
+CORS_ALLOW_CREDENTIALS = True
+
+# For development only - allow all origins
+CORS_ALLOW_ALL_ORIGINS = True  # Remove this in production

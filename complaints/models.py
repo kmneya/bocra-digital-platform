@@ -19,12 +19,20 @@ class Complaint(models.Model):
         ('numbering', 'Numbering'),
         ('billing', 'Billing'),
         ('internet_speed', 'Internet Speed'),
+        ('other','Other')
     )
 
+    name = models.CharField(max_length=255, help_text="Your full name")
+    company = models.CharField(max_length=255, blank=True, null=True, help_text="Company name (optional)")
+    telephone = models.CharField(max_length=20, help_text="Contact telephone number")
+    email = models.EmailField(help_text="Email address")
+    
+    # Complaint Details
+    complaint_text = models.TextField(help_text="Describe your complaint in detail")
+    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='complaints')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES,)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='other')
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     assigned_to = models.ForeignKey(

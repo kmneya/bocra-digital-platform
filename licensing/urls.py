@@ -1,9 +1,11 @@
 from django.urls import path
-from .views import license_list, license_detail,apply_license,aircraft_license_form
+from . import views
 
 urlpatterns = [
-    path('apply/', apply_license, name='apply_license'),
-    path('aircraft/', aircraft_license_form, name='aircraft_license_form'),
-    path('', license_list, name='license_list'),
-    path('<int:pk>/', license_detail, name='license_detail'),
+    path('', views.license_list, name='license_list'),
+    path('apply/', views.apply_license, name='apply_license'),
+    path('apply/aircraft/', views.aircraft_license_form, name='aircraft_license_form'),
+    path('apply/cellular/', views.cellular_license_form, name='cellular_license_form'),
+    path('<int:pk>/', views.license_detail, name='license_detail'),
+    path('<int:pk>/review/', views.review_license, name='review_license'),
 ]

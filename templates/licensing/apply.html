@@ -1,21 +1,59 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Select License Type</h2>
-
-<form method="POST">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label>Select License</label>
-        <select name="license_type" class="form-select">
-            <option value="">-- Select --</option>
-            <option value="aircraft_radio">Aircraft Radio License</option>
-        </select>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="mb-4">Apply For A License</h2>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- License Type Selection -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select License Type</label>
+                            <select name="license_type" class="form-select" required>
+                                <option value="">-- Select License Type --</option>
+                                <option value="aircraft_radio">Aircraft Radio License</option>
+                                <option value="amateur_rad_lis">Amateur Radio License</option>
+                                <option value="broadcasting_lis">Broadcasting License</option>
+                                <option value="cellular_details">Cellular License</option>
+                                <option value="citizen_band_rad_lis">Citizen Band Radio License</option>
+                                <option value="vans_lis">VANS License</option>
+                                <option value="point_to_to_lis">Point-to-Point License</option>
+                                <option value="satellite_service_lis">Satellite Service License</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Business Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Business Name</label>
+                            <input type="text" name="business_name" class="form-control" placeholder="Enter business name" required>
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Details of License</label>
+                            <textarea name="details" class="form-control" rows="5" placeholder="Provide details about your license application..." required></textarea>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Application
+                            </button>
+                            <a href="/redirect-dashboard/" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <button type="submit" class="btn btn-primary">Continue</button>
-</form>
+</div>
 {% endblock %}
 
 <script>

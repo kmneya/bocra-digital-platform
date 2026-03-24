@@ -1,26 +1,104 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h2>Submit Complaint</h2>
-
-<form method="POST" class="mt-3">
-    {% csrf_token %}
-
-    <div class="mb-3">
-        {{ form.category.label_tag }}
-        {{ form.category }}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold">File a Complaint</h1>
+                <p class="text-muted">BOCRA will investigate consumer complaints against service providers</p>
+            </div>
+            
+            <!-- Complaint Form -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Name</label>
+                            {{ form.name }}
+                        </div>
+                        
+                        <!-- Company -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Company</label>
+                            {{ form.company }}
+                        </div>
+                        
+                        <!-- Telephone -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Telephone</label>
+                            {{ form.telephone }}
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">E-mail</label>
+                            {{ form.email }}
+                        </div>
+                        
+                        <!-- Type of Complaint (Dropdown) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Type of Complaint</label>
+                            {{ form.category }}
+                        </div>
+                        
+                        <!-- Complaint Text -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Complaint</label>
+                            {{ form.complaint_text }}
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Complaint
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Complaints Process Info -->
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Complaints Process</h5>
+                    <p class="text-muted mb-0">
+                        BOCRA will investigate a consumer complaint against a service provider if there is sufficient evidence to establish 
+                        a prima facie case on possible breaches of any provisions under the Communications Regulatory Authority Act.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        {{ form.title.label_tag }}
-        {{ form.title }}
-    </div>
-
-    <div class="mb-3">
-        {{ form.description.label_tag }}
-        {{ form.description }}
-    </div>
-
-    <button type="submit" class="btn btn-success">Submit</button>
-</form>
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: var(--bocra-sky);
+        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
+    }
+    
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    }
+</style>
 {% endblock %}

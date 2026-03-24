@@ -1,33 +1,122 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<h2 class="mb-4">Citizen Dashboard</h2>
-
-<div class="row">
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm">
-            <h5>Total Complaints</h5>
-            <p>{{ complaints.count }}</p>
+<div class="container">
+    <!-- Welcome Section -->
+    <div class="hero-section text-center animate-fade-in">
+        <h1 class="display-4">Welcome, {{ user.username }}!</h1>
+        <p class="lead">Your BOCRA Digital Service Portal</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-file-alt fa-2x mb-2"></i>
+                    <h5>Total Complaints</h5>
+                    <h2 class="stat-number">{{ complaints.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h5>Resolved</h5>
+                    <h2 class="stat-number">{{ resolved_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x mb-2"></i>
+                    <h5>Pending</h5>
+                    <h2 class="stat-number">{{ pending_count }}</h2>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm">
-            <h5>Resolved</h5>
-            <p>{{ resolved_count }}</p>
+    
+    <!-- Complaints Table -->
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>My Complaints</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Company</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Date</th>
+                        </thead>
+                        <tbody>
+                            {% for complaint in complaints %}
+                            <tr>
+                                <td>#{{ complaint.id }}</td>
+                                <td>{{ complaint.company }}</td>
+                                <td>{{ complaint.category }}</td>
+                                <td>
+                                    <span class="badge {% if complaint.status == 'resolved' %}bg-success{% elif complaint.status == 'in_progress' %}bg-info{% else %}bg-warning{% endif %}">
+                                        {{ complaint.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if complaint.priority == 'high' %}bg-danger{% elif complaint.priority == 'medium' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                        {{ complaint.priority|default:"medium" }}
+                                    </span>
+                                </td>
+                                <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    No complaints submitted yet
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="/complaints/create/" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Submit New Complaint
+                </a>
+            </div>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card p-3 shadow-sm">
-            <h5>Pending</h5>
-            <p>{{ pending_count }}</p>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-file-signature me-2"></i>Apply for License</h5>
+                    <p class="text-muted">Submit a new license application online</p>
+                    <a href="/licenses/apply/" class="btn btn-outline-primary">Apply Now →</a>
+                    <a href="/licenses/" class="btn btn-outline-primary">Licenses →</a>
+                </div>
+            </div>
+            
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-chart-line me-2"></i>My Tarrifs</h5>
+                    <p class="text-muted">View telecommunications service quality reports</p>
+                    <a href="#" class="btn btn-outline-primary">View Reports →</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<a href="/complaints/create/" class="btn btn-primary mt-4">Submit Complaint</a>
-<a href="/licenses/apply/" class="btn btn-success mt-3">
-    Apply for License
-</a>
 {% endblock %}
