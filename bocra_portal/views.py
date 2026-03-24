@@ -1,6 +1,8 @@
+from django.contrib import messages
 from django.shortcuts import render
 
 def home(request):
+    messages.get_messages(request).used = True
     return render(request, 'home.html')
 
 def about(request):

@@ -45,3 +45,7 @@ def logout_view(request):
 
 class UserLoginView(LoginView):
     template_name = 'users/login.html'
+    
+    def get(self, request, *args, **kwargs):
+        messages.get_messages(request).used = True
+        return super().get(request, *args, **kwargs)
