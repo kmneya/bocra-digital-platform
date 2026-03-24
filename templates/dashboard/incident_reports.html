@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sidebar-wrapper">
+    {% include "includes/sidebar.html" %}
+    <div class="main-content">
+        <h2>Incident Reports</h2>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Title</th>
+                        <th>Severity</th>
+                        <th>Start Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for incident in incidents %}
+                    <tr>
+                        <td>{{ incident.provider.name }}</td>
+                        <td>{{ incident.title }}</td>
+                        <td>
+                            <span class="badge bg-{% if incident.severity == 'critical' %}danger{% elif incident.severity == 'high' %}warning{% else %}info{% endif %}">
+                                {{ incident.get_severity_display }}
+                            </span>
+                        </td>
+                        <td>{{ incident.start_time|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if incident.is_resolved %}
+                                <span class="badge bg-success">Resolved</span>
+                            {% else %}
+                                <span class="badge bg-warning">Active</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No incidents reported</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

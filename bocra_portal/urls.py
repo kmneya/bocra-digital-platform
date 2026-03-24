@@ -42,6 +42,7 @@ urlpatterns = [
     path('complaints/', include('complaints.urls')),
     path('licenses/', include('licensing.urls')),
     path('redirect-dashboard/', redirect_dashboard, name='redirect_dashboard'),
+    path('monitoring/', include('monitoring.urls')),
     #Api
     path('api/', include('complaints.api.urls')),
     path('api/dashboard/', include('dashboard.api.urls')),
