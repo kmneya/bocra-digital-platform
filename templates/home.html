@@ -2,8 +2,11 @@
 {% load static %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section with Video -->
 <div class="hero-section">
+    <video autoplay muted loop playsinline>
+        <source src="{% static 'images/background-bg.mp4' %}" type="video/mp4">
+    </video>
     <div class="container text-center">
         <div class="row justify-content-center">
             <div class="col-lg-8">

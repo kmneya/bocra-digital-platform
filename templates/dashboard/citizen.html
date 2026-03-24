@@ -53,8 +53,7 @@
                             <th>ID</th>
                             <th>Company</th>
                             <th>Category</th>
-                            <th>Status</th>
-                            <th>Priority</th>
+                            <th>Status</th>                            
                             <th>Date</th>
                         </thead>
                         <tbody>
@@ -68,11 +67,7 @@
                                         {{ complaint.status }}
                                     </span>
                                 </td>
-                                <td>
-                                    <span class="badge {% if complaint.priority == 'high' %}bg-danger{% elif complaint.priority == 'medium' %}bg-warning{% else %}bg-secondary{% endif %}">
-                                        {{ complaint.priority|default:"medium" }}
-                                    </span>
-                                </td>
+                                
                                 <td>{{ complaint.created_at|date:"M d, Y" }}</td>
                             </tr>
                             {% empty %}
