@@ -14,7 +14,7 @@ def create_complaint(request):
             complaint = form.save(commit=False)
             complaint.user = request.user
             complaint.save()
-            messages.success(request, 'Your complaint has been submitted successfully!')
+           # messages.success(request, 'Your complaint has been submitted successfully!')
             return redirect('redirect_dashboard')
     else:
         form = ComplaintForm()
