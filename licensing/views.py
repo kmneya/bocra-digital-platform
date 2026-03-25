@@ -115,6 +115,11 @@ def cellular_license_form(request):
 
 @login_required
 def license_list(request):
+
+    # Clear message after showing it once
+    if 'submitted' in request.GET:
+        messages.get_messages(request).used = True
+    
     """List all licenses for the current user"""
     if request.user.role == 'officer':
         licenses = LicenseApplication.objects.all()
