@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from complaints.models import Complaint
@@ -23,6 +24,8 @@ def redirect_dashboard(request):
 def citizen_dashboard(request):
     if request.user.role != 'citizen':
         return redirect('officer_dashboard')
+    messages.get_messages(request).used = True
+    
     complaints = Complaint.objects.filter(user=request.user)
     
     context = {
