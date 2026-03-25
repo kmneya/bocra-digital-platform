@@ -4,6 +4,10 @@ from django.contrib import messages
 from users.decorators import citizen_required, officer_required
 from .models import LicenseApplication, AircraftRadioLicense, CellularLicense
 from .forms import CellularLicenseForm
+from django.utils import timezone
+from django.db.models import Q, Count, Sum
+from payments.models import PaymentTransaction
+
 
 @login_required
 @citizen_required
@@ -67,7 +71,7 @@ def aircraft_license_form(request):
         request.session.pop('temp_details', None)
         
         messages.success(request, f'Aircraft Radio License application submitted successfully!')
-        return redirect('license_list')
+        return redirect('initiate_payment', license_id=license_app.id)
 
     return render(request, 'licensing/aircraft_form.html')
 
@@ -102,9 +106,11 @@ def cellular_license_form(request):
         request.session.pop('temp_details', None)
         
         messages.success(request, f'Cellular License application submitted successfully!')
-        return redirect('license_list')
+        return redirect('initiate_payment', license_id=license_app.id)
 
     return render(request, 'licensing/cellular_form.html')
+
+
 
 
 @login_required
@@ -115,25 +121,56 @@ def license_list(request):
     else:
         licenses = LicenseApplication.objects.filter(user=request.user)
     
-    # Debug: Print to console
-    print(f"User: {request.user.username}")
-    print(f"Role: {request.user.role}")
-    print(f"License count: {licenses.count()}")
-    for license in licenses:
-        print(f"License: {license.business_name} - {license.license_type}")
+    # Calculate payment statistics
+    paid_count = 0
+    pending_payment_count = 0
+    under_review_count = 0
+    approved_count = 0
+    rejected_count = 0
     
-    return render(request, 'licensing/list.html', {'licenses': licenses})
-
+    for license in licenses:
+        payment = license.payments.first() if hasattr(license, 'payments') else None
+        
+        if payment and payment.status == 'completed':
+            paid_count += 1
+        elif payment and payment.status in ['pending', 'processing']:
+            pending_payment_count += 1
+        elif not payment:
+            pending_payment_count += 1
+        
+        # Application status counts
+        if license.status == 'under_review':
+            under_review_count += 1
+        elif license.status == 'approved':
+            approved_count += 1
+        elif license.status == 'rejected':
+            rejected_count += 1
+    
+    context = {
+        'licenses': licenses,
+        'paid_count': paid_count,
+        'pending_payment_count': pending_payment_count,
+        'under_review_count': under_review_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+    }
+    
+    return render(request, 'licensing/list.html', context)
 
 @login_required
 def license_detail(request, pk):
-    """View a single license application with its specific details"""
+    """View a single license application"""
     license_app = get_object_or_404(LicenseApplication, id=pk)
     
     # Check permissions
     if request.user.role != 'officer' and license_app.user != request.user:
         messages.error(request, "You don't have permission to view this application.")
         return redirect('license_list')
+    
+    # Get payment info
+    payment = None
+    if hasattr(license_app, 'payments'):
+        payment = license_app.payments.first()
     
     # Get the specific license details based on type
     specific_details = None
@@ -148,9 +185,43 @@ def license_detail(request, pk):
         except CellularLicense.DoesNotExist:
             pass
     
+    # Determine what actions are available to the user
+    show_payment_button = False
+    show_track_payment = False
+    show_view_receipt = False
+    payment_message = None
+    
+    if request.user.role == 'citizen':
+        if payment:
+            if payment.status == 'completed':
+                show_view_receipt = True
+                payment_message = 'Payment completed successfully!'
+            elif payment.status == 'pending':
+                show_track_payment = True
+                payment_message = 'Your payment is being processed.'
+            elif payment.status == 'failed':
+                show_payment_button = True
+                payment_message = 'Your payment failed. Please try again.'
+        else:
+            # No payment record exists
+            if license_app.status == 'submitted':
+                show_payment_button = True
+                payment_message = 'Payment required to process your application.'
+            elif license_app.status == 'approved':
+                payment_message = 'Your license has been approved!'
+            elif license_app.status == 'rejected':
+                payment_message = 'Your application was rejected.'
+            elif license_app.status == 'under_review':
+                payment_message = 'Your application is under review.'
+    
     context = {
         'application': license_app,
         'specific_details': specific_details,
+        'payment': payment,
+        'show_payment_button': show_payment_button,
+        'show_track_payment': show_track_payment,
+        'show_view_receipt': show_view_receipt,
+        'payment_message': payment_message,
     }
     
     return render(request, 'licensing/detail.html', context)
@@ -180,3 +251,119 @@ def review_license(request, pk):
         return redirect('license_list')
     
     return render(request, 'licensing/review.html', {'application': license_app})
+
+@login_required
+@officer_required
+def officer_license_list(request):
+    """Officer view for all license applications"""
+    # Get all applications with payment info
+    applications = LicenseApplication.objects.all().order_by('-created_at')
+    
+    # Add payment info to each application
+    for app in applications:
+        payment = PaymentTransaction.objects.filter(license_application=app).first()
+        app.has_payment = payment is not None
+        app.payment_status = payment.status if payment else 'not_paid'
+        app.payment_amount = payment.amount if payment else None
+    
+    # Statistics
+    total_applications = applications.count()
+    pending_review = applications.filter(status='submitted').count()
+    under_review = applications.filter(status='under_review').count()
+    approved = applications.filter(status='approved').count()
+    rejected = applications.filter(status='rejected').count()
+    
+    # Get applications by license type
+    by_type = applications.values('license_type').annotate(count=Count('id'))
+    
+    context = {
+        'applications': applications,
+        'total_applications': total_applications,
+        'pending_review': pending_review,
+        'under_review': under_review,
+        'approved': approved,
+        'rejected': rejected,
+        'by_type': by_type,
+    }
+    
+    return render(request, 'licensing/officer_list.html', context)
+
+
+@login_required
+@officer_required
+def officer_license_detail(request, pk):
+    """Officer view for a single license application"""
+    application = get_object_or_404(LicenseApplication, id=pk)
+    
+    # Get payment info
+    payment = PaymentTransaction.objects.filter(license_application=application).first()
+    
+    # Get specific license details based on type
+    specific_details = None
+    if application.license_type == 'aircraft_radio':
+        try:
+            specific_details = AircraftRadioLicense.objects.get(application=application)
+        except AircraftRadioLicense.DoesNotExist:
+            pass
+    elif application.license_type == 'cellular_details':
+        try:
+            specific_details = CellularLicense.objects.get(application=application)
+        except CellularLicense.DoesNotExist:
+            pass
+    
+    context = {
+        'application': application,
+        'payment': payment,
+        'specific_details': specific_details,
+    }
+    
+    return render(request, 'licensing/officer_detail.html', context)
+
+
+@login_required
+@officer_required
+def officer_license_action(request, pk):
+    """Process approve/reject action on license"""
+    application = get_object_or_404(LicenseApplication, id=pk)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        notes = request.POST.get('notes', '')
+        
+        if action == 'approve':
+            application.status = 'approved'
+            application.reviewed_at = timezone.now()
+            application.reviewed_by = request.user
+            application.review_notes = notes
+            application.save()
+            
+            messages.success(
+                request, 
+                f'License application #{application.id} for {application.business_name} has been APPROVED.'
+            )
+            
+        elif action == 'reject':
+            application.status = 'rejected'
+            application.reviewed_at = timezone.now()
+            application.reviewed_by = request.user
+            application.review_notes = notes
+            application.save()
+            
+            messages.warning(
+                request, 
+                f'License application #{application.id} for {application.business_name} has been REJECTED.'
+            )
+        
+        elif action == 'request_info':
+            application.status = 'additional_info'
+            application.review_notes = notes
+            application.save()
+            
+            messages.info(
+                request, 
+                f'Additional information requested for application #{application.id}.'
+            )
+        
+        return redirect('officer_license_list')
+    
+    return redirect('officer_license_detail', pk=pk)

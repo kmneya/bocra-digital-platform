@@ -6,24 +6,91 @@
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
+                    <!-- Header with Status -->
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
                             <h2>{{ application.business_name }}</h2>
                             <p class="text-muted">Reference: #{{ application.id }}</p>
+                            <p class="text-muted">License Type: {{ application.get_license_type_display }}</p>
                         </div>
-                        <span class="badge 
-                            {% if application.status == 'approved' %}bg-success
-                            {% elif application.status == 'rejected' %}bg-danger
-                            {% elif application.status == 'under_review' %}bg-info
-                            {% else %}bg-secondary{% endif %} fs-6 p-2">
-                            {{ application.get_status_display }}
-                        </span>
+                        <div>
+                            <!-- Application Status Badge -->
+                            {% if application.status == 'approved' %}
+                                <span class="badge bg-success fs-6 p-2">
+                                    <i class="fas fa-check-circle me-1"></i>APPROVED
+                                </span>
+                            {% elif application.status == 'rejected' %}
+                                <span class="badge bg-danger fs-6 p-2">
+                                    <i class="fas fa-times-circle me-1"></i>REJECTED
+                                </span>
+                            {% elif application.status == 'under_review' %}
+                                <span class="badge bg-info fs-6 p-2">
+                                    <i class="fas fa-search me-1"></i>UNDER REVIEW
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6 p-2">
+                                    <i class="fas fa-clock me-1"></i>{{ application.get_status_display|upper }}
+                                </span>
+                            {% endif %}
+                        </div>
                     </div>
                     
+                    <!-- Application Details -->
                     <div class="mb-4">
-                        <strong>License Type:</strong> {{ application.get_license_type_display }}<br>
-                        <strong>Submitted:</strong> {{ application.created_at|date:"M d, Y" }}<br>
-                        <strong>Details:</strong> {{ application.details }}
+                        <strong>Submitted:</strong> {{ application.created_at|date:"M d, Y H:i" }}<br>
+                        <strong>Details:</strong>
+                        <p class="mt-2 bg-light p-3 rounded">{{ application.details }}</p>
+                    </div>
+                    
+                    <!-- PAYMENT STATUS SECTION -->
+                    <div class="card mb-4 
+                        {% if payment and payment.status == 'completed' %}border-success
+                        {% elif payment and payment.status == 'pending' %}border-warning
+                        {% elif payment and payment.status == 'failed' %}border-danger
+                        {% else %}border-secondary{% endif %}">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Payment Status</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if payment %}
+                                {% if payment.status == 'completed' %}
+                                    <div class="alert alert-success mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Payment Completed!</strong><br>
+                                        Transaction ID: {{ payment.transaction_id }}<br>
+                                        Amount Paid: <strong>P{{ payment.amount }}</strong><br>
+                                        Paid on: {{ payment.paid_at|date:"M d, Y H:i" }}
+                                    </div>
+                                {% elif payment.status == 'pending' %}
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <strong>Payment Pending</strong><br>
+                                        Transaction ID: {{ payment.transaction_id }}<br>
+                                        Amount: P{{ payment.amount }}<br>
+                                        Status: Waiting for payment confirmation
+                                    </div>
+                                {% elif payment.status == 'processing' %}
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>
+                                        <strong>Payment Processing</strong><br>
+                                        Your payment is being processed. Please wait.
+                                    </div>
+                                {% elif payment.status == 'failed' %}
+                                    <div class="alert alert-danger mb-0">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <strong>Payment Failed</strong><br>
+                                        Transaction ID: {{ payment.transaction_id }}<br>
+                                        Please try again or contact support.
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-secondary mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>{{ payment_message|default:"Payment Required" }}</strong><br>
+                                    A license fee is required to process your application.
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                     
                     <!-- Aircraft Radio Specific Details -->
@@ -67,23 +134,68 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Review Notes -->
+                    <!-- Action Buttons for Citizens -->
+                    {% if request.user.role == 'citizen' %}
+                        {% if show_payment_button %}
+                            <div class="mt-4">
+                                <a href="/payments/initiate/{{ application.id }}/" class="btn btn-success btn-lg w-100">
+                                    <i class="fas fa-credit-card me-2"></i>Pay License Fee Now
+                                </a>
+                            </div>
+                        {% elif show_track_payment %}
+                            <div class="mt-4">
+                                <a href="/payments/status/{{ payment.id }}/" class="btn btn-info btn-lg w-100">
+                                    <i class="fas fa-eye me-2"></i>Track Payment Status
+                                </a>
+                            </div>
+                        {% elif show_view_receipt %}
+                            <div class="mt-4">
+                                <a href="/payments/status/{{ payment.id }}/" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-receipt me-2"></i>View Payment Receipt
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <!-- Review Notes (if any) -->
                     {% if application.review_notes %}
                     <div class="mt-4">
                         <h5>Review Notes</h5>
-                        <p class="text-muted">{{ application.review_notes }}</p>
-                        {% if application.reviewed_by %}
-                            <small>Reviewed by: {{ application.reviewed_by.username }} on {{ application.reviewed_at|date:"M d, Y" }}</small>
-                        {% endif %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">{{ application.review_notes }}</p>
+                            {% if application.reviewed_by %}
+                                <small class="text-muted mt-2 d-block">
+                                    Reviewed by: {{ application.reviewed_by.username }} on {{ application.reviewed_at|date:"M d, Y H:i" }}
+                                </small>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endif %}
                     
+                    <!-- Back Button -->
                     <div class="mt-4">
-                        <a href="/licenses/" class="btn btn-outline-secondary">Back to Licenses</a>
+                        <a href="/licenses/" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Licenses
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .alert {
+        border-radius: 10px;
+    }
+    .border-success {
+        border-color: #28a745 !important;
+    }
+    .border-warning {
+        border-color: #ffc107 !important;
+    }
+    .border-danger {
+        border-color: #dc3545 !important;
+    }
+</style>
 {% endblock %}

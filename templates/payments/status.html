@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Payment Status</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Status Header -->
+                    <div class="text-center mb-4">
+                        {% if payment.status == 'completed' %}
+                            <i class="fas fa-check-circle fa-4x text-success"></i>
+                            <h3 class="mt-2 text-success">Payment Completed</h3>
+                        {% elif payment.status == 'pending' %}
+                            <i class="fas fa-clock fa-4x text-warning"></i>
+                            <h3 class="mt-2 text-warning">Pending Verification</h3>
+                        {% elif payment.status == 'processing' %}
+                            <i class="fas fa-spinner fa-4x text-info fa-spin"></i>
+                            <h3 class="mt-2 text-info">Processing</h3>
+                        {% elif payment.status == 'failed' %}
+                            <i class="fas fa-times-circle fa-4x text-danger"></i>
+                            <h3 class="mt-2 text-danger">Payment Failed</h3>
+                        {% else %}
+                            <i class="fas fa-question-circle fa-4x text-secondary"></i>
+                            <h3 class="mt-2">{{ payment.get_status_display }}</h3>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Transaction Details -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5>Transaction Details</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Transaction ID:</strong><br>
+                                    <code>{{ payment.transaction_id }}</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Reference Number:</strong><br>
+                                    <code>{{ payment.reference_number|default:"N/A" }}</code>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <strong>Amount:</strong><br>
+                                    P{{ payment.amount }}
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <strong>Date:</strong><br>
+                                    {{ payment.created_at|date:"F d, Y H:i" }}
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <strong>Description:</strong><br>
+                                    {{ payment.description|default:"License Application Fee" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- License Details -->
+                    {% if payment.license_application %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5>License Application</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Application ID:</strong> #{{ payment.license_application.id }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>License Type:</strong> {{ payment.license_application.get_license_type_display }}
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <strong>Business Name:</strong> {{ payment.license_application.business_name }}
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <strong>Status:</strong>
+                                    <span class="badge 
+                                        {% if payment.license_application.status == 'approved' %}bg-success
+                                        {% elif payment.license_application.status == 'rejected' %}bg-danger
+                                        {% elif payment.license_application.status == 'under_review' %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ payment.license_application.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Payment Gateway Response -->
+                    {% if payment.gateway_response %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5>Payment Gateway Information</h5>
+                            <pre class="bg-light p-3 rounded small mb-0">{{ payment.gateway_response|safe }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-center">
+                        {% if payment.status != 'completed' and can_verify %}
+                            <a href="/payments/verify/{{ payment.id }}/" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Verify Payment
+                            </a>
+                        {% endif %}
+                        
+                        {% if payment.license_application %}
+                            <a href="/licenses/{{ payment.license_application.id }}/" class="btn btn-outline-primary">
+                                <i class="fas fa-file-alt me-2"></i>View Application
+                            </a>
+                        {% endif %}
+                        
+                        <a href="/redirect-dashboard/" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

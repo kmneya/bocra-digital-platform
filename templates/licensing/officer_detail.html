@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sidebar-wrapper">
+    {% include "includes/sidebar.html" %}
+    <div class="main-content">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">License Application #{{ application.id }}</h4>
+                    <a href="/licenses/officer/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Applicant Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Applicant Details</h6>
+                        <p><strong>Name:</strong> {{ application.user.get_full_name|default:application.user.username }}</p>
+                        <p><strong>Email:</strong> {{ application.user.email }}</p>
+                        <p><strong>Business Name:</strong> {{ application.business_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Application Details</h6>
+                        <p><strong>License Type:</strong> {{ application.get_license_type_display }}</p>
+                        <p><strong>Submitted:</strong> {{ application.created_at|date:"F d, Y H:i" }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="badge 
+                                {% if application.status == 'approved' %}bg-success
+                                {% elif application.status == 'rejected' %}bg-danger
+                                {% elif application.status == 'under_review' %}bg-info
+                                {% else %}bg-warning{% endif %} fs-6">
+                                {{ application.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Payment Information -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6>Payment Information</h6>
+                        {% if payment %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Transaction ID:</strong> {{ payment.transaction_id }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Amount:</strong> P{{ payment.amount }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong>
+                                    <span class="badge 
+                                        {% if payment.status == 'completed' %}bg-success
+                                        {% elif payment.status == 'pending' %}bg-warning
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Paid Date:</strong> {{ payment.paid_at|date:"F d, Y H:i"|default:"Not paid" }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No payment recorded for this application.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Application Details -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>Application Details</h6>
+                        <p><strong>Business Name:</strong> {{ application.business_name }}</p>
+                        <p><strong>Details:</strong></p>
+                        <p class="bg-light p-3 rounded">{{ application.details }}</p>
+                    </div>
+                </div>
+                
+                <!-- License Specific Details -->
+                {% if specific_details %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>License Specific Details</h6>
+                        {% if application.license_type == 'aircraft_radio' %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Name:</strong> {{ specific_details.name }}<br>
+                                    <strong>Nationality:</strong> {{ specific_details.nationality }}<br>
+                                    <strong>Email:</strong> {{ specific_details.email }}<br>
+                                    <strong>Phone:</strong> {{ specific_details.phone }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Station Name:</strong> {{ specific_details.station_name }}<br>
+                                    <strong>City:</strong> {{ specific_details.city }}<br>
+                                    <strong>Equipment:</strong> {{ specific_details.equipment_type }} {{ specific_details.model }}
+                                </div>
+                            </div>
+                        {% elif application.license_type == 'cellular_details' %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Site Name:</strong> {{ specific_details.site_name }}<br>
+                                    <strong>Location:</strong> {{ specific_details.site_location }}<br>
+                                    <strong>Equipment:</strong> {{ specific_details.equipment_type }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Frequency:</strong> {{ specific_details.frequency_band }}<br>
+                                    <strong>Service:</strong> {{ specific_details.service_type }}<br>
+                                    <strong>Coverage:</strong> {{ specific_details.coverage_area|default:"Not specified" }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Review Notes -->
+                {% if application.review_notes %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>Review Notes</h6>
+                        <p>{{ application.review_notes }}</p>
+                        {% if application.reviewed_by %}
+                            <small class="text-muted">Reviewed by: {{ application.reviewed_by.username }} on {{ application.reviewed_at|date:"F d, Y H:i" }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Action Form -->
+                {% if application.status not in 'approved,rejected' %}
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">Take Action</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/licenses/officer/{{ application.id }}/action/">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Review Notes</label>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Enter your review comments..."></textarea>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" name="action" value="approve" class="btn btn-success">
+                                    <i class="fas fa-check-circle me-1"></i>Approve License
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                    <i class="fas fa-times-circle me-1"></i>Reject License
+                                </button>
+                                <button type="submit" name="action" value="request_info" class="btn btn-info">
+                                    <i class="fas fa-question-circle me-1"></i>Request More Info
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

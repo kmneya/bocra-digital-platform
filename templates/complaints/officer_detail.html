@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="sidebar-wrapper">
+    {% include "includes/sidebar.html" %}
+    <div class="main-content">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Complaint #{{ complaint.reference_number|default:complaint.id }}</h4>
+                    <a href="/complaints/officer/" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Back to List
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Complaint Header -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Complainant Details</h6>
+                        <p><strong>Name:</strong> {{ complaint.name }}</p>
+                        <p><strong>Company:</strong> {{ complaint.company|default:"N/A" }}</p>
+                        <p><strong>Email:</strong> {{ complaint.email }}</p>
+                        <p><strong>Phone:</strong> {{ complaint.telephone }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Complaint Details</h6>
+                        <p><strong>Type:</strong> {{ complaint.get_complaint_type_display }}</p>
+                        <p><strong>Service Provider:</strong> {{ complaint.service_provider|default:"Not specified" }}</p>
+                        <p><strong>Status:</strong> 
+                            <span class="badge 
+                                {% if complaint.status == 'resolved' %}bg-success
+                                {% elif complaint.status == 'investigating' %}bg-info
+                                {% elif complaint.status == 'closed' %}bg-secondary
+                                {% else %}bg-warning{% endif %} fs-6">
+                                {{ complaint.get_status_display }}
+                            </span>
+                        </p>
+                        <p><strong>Submitted:</strong> {{ complaint.created_at|date:"F d, Y H:i" }}</p>
+                        {% if complaint.resolved_at %}
+                        <p><strong>Resolved:</strong> {{ complaint.resolved_at|date:"F d, Y H:i" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Complaint Description -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>Complaint Description</h6>
+                        <p class="bg-light p-3 rounded">{{ complaint.complaint_text }}</p>
+                    </div>
+                </div>
+                
+                <!-- Evidence Section -->
+                {% if complaint.supporting_documents %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>Supporting Documents</h6>
+                        <a href="{{ complaint.supporting_documents.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                            <i class="fas fa-file-download me-1"></i>Download Evidence
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Investigation Notes -->
+                {% if complaint.investigation_notes %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h6>Investigation Notes</h6>
+                        <p>{{ complaint.investigation_notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Resolution Summary -->
+                {% if complaint.resolution_summary %}
+                <div class="card mb-4 bg-success bg-opacity-10">
+                    <div class="card-body">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i>Resolution Summary</h6>
+                        <p>{{ complaint.resolution_summary }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Update History -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Update History</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for update in updates %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ update.updated_by.username }}</strong>
+                                    <small class="text-muted">{{ update.created_at|date:"M d, Y H:i" }}</small>
+                                </div>
+                                <p class="mb-1">{{ update.comment }}</p>
+                                {% if update.status_before %}
+                                <small class="text-muted">Status: {{ update.status_before }} → {{ update.status_after }}</small>
+                                {% endif %}
+                            </div>
+                            {% empty %}
+                            <div class="list-group-item text-center text-muted">
+                                No updates recorded.
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Form -->
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">Take Action</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/complaints/officer/{{ complaint.id }}/action/">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Action</label>
+                                <select name="action" class="form-select" id="actionSelect" required>
+                                    <option value="">Select Action</option>
+                                    <option value="assign">Assign to Me</option>
+                                    <option value="update_status">Update Status</option>
+                                    <option value="resolve">Resolve Complaint</option>
+                                    <option value="close">Close Complaint</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="statusGroup" style="display: none;">
+                                <label class="form-label">New Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="pending">Pending</option>
+                                    <option value="investigating">Under Investigation</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Notes / Resolution Details</label>
+                                <textarea name="notes" class="form-control" rows="4" placeholder="Enter your notes, investigation findings, or resolution details..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Submit Action
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const actionSelect = document.getElementById('actionSelect');
+    const statusGroup = document.getElementById('statusGroup');
+    
+    actionSelect.addEventListener('change', function() {
+        if (this.value === 'update_status') {
+            statusGroup.style.display = 'block';
+        } else {
+            statusGroup.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

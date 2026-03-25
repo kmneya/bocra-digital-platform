@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-credit-card fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Pay License Fee</h2>
+                        <p class="text-muted">{{ license_app.get_license_type_display }}</p>
+                    </div>
+                    
+                    <!-- Application Summary -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="mb-3">Application Summary</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">Application ID</small>
+                                    <p class="fw-bold mb-2">#{{ license_app.id }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">Business Name</small>
+                                    <p class="fw-bold mb-2">{{ license_app.business_name }}</p>
+                                </div>
+                                <div class="col-md-12">
+                                    <small class="text-muted">License Type</small>
+                                    <p class="fw-bold mb-0">{{ license_app.get_license_type_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fee Breakdown -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6>Fee Breakdown</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>License Application Fee</span>
+                                <span>P{{ amount }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-muted">
+                                <span>Processing Fee</span>
+                                <span>P0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Total Amount Due</span>
+                                <span class="text-primary">P{{ amount }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Select Payment Method</label>
+                            {{ form.payment_method }}
+                            <small class="text-muted">Choose your preferred payment method</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Payment Type</label>
+                            {{ form.payment_type }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Amount (BWP)</label>
+                            {{ form.amount }}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Description</label>
+                            {{ form.description }}
+                        </div>
+                        
+                        <div class="alert alert-info small">
+                            <i class="fas fa-lock me-2"></i>
+                            Your payment is secure and encrypted. After successful payment, your application will be queued for review.
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-arrow-right me-2"></i>Proceed to Payment
+                            </button>
+                            <a href="/licenses/{{ license_app.id }}/" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Payment Methods Info -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Accepted Payment Methods</h6>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                                    <p class="small mb-0">Mobile Money</p>
+                                </div>
+                                <div class="col-3">
+                                    <i class="fas fa-credit-card fa-2x text-primary"></i>
+                                    <p class="small mb-0">Card Payment</p>
+                                </div>
+                                <div class="col-3">
+                                    <i class="fas fa-university fa-2x text-primary"></i>
+                                    <p class="small mb-0">Bank Transfer</p>
+                                </div>
+                                <div class="col-3">
+                                    <i class="fas fa-money-bill-wave fa-2x text-primary"></i>
+                                    <p class="small mb-0">Cash (In-Person)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

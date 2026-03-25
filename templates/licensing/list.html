@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <div class="container py-4">
@@ -13,21 +14,78 @@
         </a>
     </div>
     
-    <!-- Debug info (remove after fixing) -->
-    {% if licenses.count == 0 %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
-        No license applications found. 
-        {% if request.user.role == 'officer' %}
-            There are no applications in the system yet.
-        {% else %}
-            Click "Apply for License" to start your first application.
-        {% endif %}
-    </div>
+    <!-- Display Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
     {% endif %}
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Total Applications</h6>
+                            <h2 class="mb-0">{{ licenses.count }}</h2>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Paid</h6>
+                            <h2 class="mb-0">{{ paid_count }}</h2>
+                        </div>
+                        <i class="fas fa-credit-card fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Pending Payment</h6>
+                            <h2 class="mb-0">{{ pending_payment_count }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">Under Review</h6>
+                            <h2 class="mb-0">{{ under_review_count }}</h2>
+                        </div>
+                        <i class="fas fa-search fa-3x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- License Applications Table -->
     <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Applications</h5>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -36,12 +94,15 @@
                             <th>ID</th>
                             <th>License Type</th>
                             <th>Business Name</th>
-                            <th>Status</th>
+                            <th>Application Status</th>
+                            <th>Payment Status</th>
+                            <th>Amount</th>
                             <th>Submitted</th>
                             <th>Action</th>
                         </thead>
                         <tbody>
                             {% for license in licenses %}
+                            {% with payment=license.payments.first %}
                             <tr>
                                 <td class="fw-bold">#{{ license.id }}</td>
                                 <td>
@@ -69,16 +130,59 @@
                                         </span>
                                     {% endif %}
                                 </td>
+                                <td>
+                                    {% if payment %}
+                                        {% if payment.status == 'completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Paid
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">{{ payment.transaction_id|truncatechars:12 }}</small>
+                                        {% elif payment.status == 'pending' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                            <br>
+                                            <a href="/payments/status/{{ payment.id }}/" class="small">Check Status</a>
+                                        {% elif payment.status == 'processing' %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-spinner fa-spin me-1"></i>Processing
+                                            </span>
+                                        {% elif payment.status == 'failed' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-exclamation-circle me-1"></i>Failed
+                                            </span>
+                                            <br>
+                                            <a href="/payments/initiate/{{ license.id }}/" class="small text-danger">Retry Payment</a>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-credit-card me-1"></i>Not Paid
+                                        </span>
+                                        <br>
+                                        <a href="/payments/initiate/{{ license.id }}/" class="small text-primary">Pay Now</a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if payment and payment.status == 'completed' %}
+                                        <span class="fw-bold text-success">P{{ payment.amount }}</span>
+                                    {% elif payment %}
+                                        <span class="text-muted">P{{ payment.amount }}</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ license.created_at|date:"M d, Y" }}</td>
                                 <td>
                                     <a href="/licenses/{{ license.id }}/" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>Track
+                                        <i class="fas fa-eye me-1"></i>View
                                     </a>
                                 </td>
                             </tr>
+                            {% endwith %}
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-5">
+                                <td colspan="8" class="text-center py-5">
                                     <i class="fas fa-file-alt fa-4x text-muted mb-3 d-block"></i>
                                     <h5 class="text-muted">No license applications yet</h5>
                                     <p class="text-muted">Start your first application today</p>
@@ -99,7 +203,7 @@
 <style>
     .table td, .table th {
         vertical-align: middle;
-        padding: 15px;
+        padding: 12px 15px;
     }
     .table tbody tr:hover {
         background-color: rgba(135, 206, 235, 0.05);
@@ -107,6 +211,16 @@
     .badge {
         padding: 6px 12px;
         font-weight: 500;
+        font-size: 0.75rem;
+    }
+    .opacity-50 {
+        opacity: 0.5;
+    }
+    .small {
+        font-size: 0.7rem;
+    }
+    .alert {
+        border-radius: 10px;
     }
 </style>
 {% endblock %}

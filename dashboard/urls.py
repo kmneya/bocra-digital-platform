@@ -28,7 +28,7 @@ urlpatterns = [
     path('reports/generate/', views.generate_reports, name='generate_reports'),
     path('reports/export/', views.export_data, name='export_data'),
     path('reports/annual/', views.annual_report, name='annual_report'),
-    
+
     # Settings
     path('settings/', views.officer_settings, name='officer_settings'),
     path('settings/notifications/', views.notification_settings, name='notification_settings'),

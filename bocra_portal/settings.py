@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'monitoring',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,13 @@ CORS_ALLOW_CREDENTIALS = True
 
 # For development only - allow all origins
 CORS_ALLOW_ALL_ORIGINS = True  # Remove this in production
+
+# Email Configuration for Password Reset (Development)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For testing - prints to console
+# For production, use:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your-email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'your-app-password'

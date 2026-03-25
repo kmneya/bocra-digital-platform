@@ -18,66 +18,77 @@
             </ul>
         </div>
         
-        <!-- Complaints Analytics -->
+        <!-- Complaints Management -->
         <div class="nav-section">
             <div class="nav-section-title">Complaints</div>
             <ul class="nav-item">
                 <li>
-                    <a href="{% url 'complaints_analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'complaints_analytics' %}active{% endif %}">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Complaints Analytics</span>
-                        <span class="badge">{{ total_complaints|default:"0" }}</span>
+                    <a href="{% url 'officer_complaint_list' %}" class="nav-link">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>All Complaints</span>
+                        <span class="badge bg-warning">{{ pending_complaints|default:"" }}</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'pending_complaints' %}" class="nav-link">
+                    <a href="{% url 'officer_complaint_list' %}?status=pending" class="nav-link">
                         <i class="fas fa-clock"></i>
                         <span>Pending Review</span>
-                        <span class="badge bg-warning">{{ pending_complaints|default:"0" }}</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'sla_report' %}" class="nav-link">
-                        <i class="fas fa-hourglass-half"></i>
-                        <span>SLA Compliance</span>
+                    <a href="{% url 'officer_complaint_list' %}?status=investigating" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Under Investigation</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'officer_complaint_list' %}?status=resolved" class="nav-link">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Resolved</span>
                     </a>
                 </li>
             </ul>
         </div>
         
-        <!-- Licensing Analytics -->
+        <!-- Licensing Management -->
         <div class="nav-section">
             <div class="nav-section-title">Licensing</div>
             <ul class="nav-item">
                 <li>
-                    <a href="{% url 'licensing_analytics' %}" class="nav-link">
-                        <i class="fas fa-chart-pie"></i>
-                        <span>Licensing Analytics</span>
-                        <span class="badge">{{ pending_licenses|default:"0" }}</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'license_list' %}" class="nav-link">
+                    <a href="{% url 'officer_license_list' %}" class="nav-link">
                         <i class="fas fa-file-alt"></i>
                         <span>All Applications</span>
+                        <span class="badge bg-warning">{{ pending_applications|default:"" }}</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'pending_licenses' %}" class="nav-link">
+                    <a href="{% url 'officer_license_list' %}?status=submitted" class="nav-link">
                         <i class="fas fa-hourglass"></i>
                         <span>Pending Review</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'approved_licenses' %}" class="nav-link">
+                    <a href="{% url 'officer_license_list' %}?status=under_review" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Under Review</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'officer_license_list' %}?status=approved" class="nav-link">
                         <i class="fas fa-check-circle"></i>
-                        <span>Approved Licenses</span>
+                        <span>Approved</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'officer_license_list' %}?status=rejected" class="nav-link">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Rejected</span>
                     </a>
                 </li>
             </ul>
         </div>
         
-        <!-- QoS & Network Monitoring -->
+        <!-- Network Monitoring -->
         <div class="nav-section">
             <div class="nav-section-title">Network Monitoring</div>
             <ul class="nav-item">
@@ -97,19 +108,32 @@
                     <a href="{% url 'incident_reports' %}" class="nav-link">
                         <i class="fas fa-bell"></i>
                         <span>Incident Reports</span>
-                        <span class="badge bg-danger">{{ active_incidents|default:"0" }}</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'regional_qos' %}" class="nav-link">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Regional QoS</span>
                     </a>
                 </li>
             </ul>
         </div>
         
-        <!-- Reports Section -->
+        <!-- Payments -->
+        <div class="nav-section">
+            <div class="nav-section-title">Payments</div>
+            <ul class="nav-item">
+                <li>
+                    <a href="{% url 'payment_list' %}" class="nav-link">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payment Dashboard</span>
+                        <span class="badge bg-warning">{{ pending_payments|default:"" }}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Revenue Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Reports -->
         <div class="nav-section">
             <div class="nav-section-title">Reports</div>
             <ul class="nav-item">
@@ -125,12 +149,6 @@
                         <span>Export Data</span>
                     </a>
                 </li>
-                <li>
-                    <a href="{% url 'annual_report' %}" class="nav-link">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Annual Reports</span>
-                    </a>
-                </li>
             </ul>
         </div>
         
@@ -142,12 +160,6 @@
                     <a href="{% url 'officer_settings' %}" class="nav-link">
                         <i class="fas fa-cog"></i>
                         <span>Dashboard Settings</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'notification_settings' %}" class="nav-link">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
                     </a>
                 </li>
             </ul>

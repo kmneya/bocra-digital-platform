@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="{{ payment_method.icon }} fa-3x text-primary mb-3"></i>
+                        <h2>Complete Your Payment</h2>
+                        <p class="text-muted">{{ payment_method.name }}</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Transaction ID:</strong> {{ transaction_id }}<br>
+                        <strong>Amount:</strong> P{{ amount }}<br>
+                        <strong>License:</strong> {{ payment.license_application.get_license_type_display }}
+                    </div>
+                    
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5>Payment Instructions</h5>
+                            <pre class="mb-0" style="white-space: pre-wrap;">{{ payment_method.instructions }}</pre>
+                            
+                            {% if payment_method.reference %}
+                            <div class="alert alert-warning mt-3">
+                                <strong>Reference to use:</strong> {{ payment_method.reference }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        {% if payment_method.name == 'Credit/Debit Card' %}
+                        <div class="mb-3">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" class="form-control" placeholder="4111 1111 1111 1111" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Date</label>
+                                <input type="text" class="form-control" placeholder="MM/YY" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="text" class="form-control" placeholder="123" required>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-warning small">
+                            <i class="fas fa-info-circle me-2"></i>
+                            This is a simulated payment demonstration. In production, this would integrate with real payment gateways.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-check-circle me-2"></i>Confirm Payment (Simulated)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
