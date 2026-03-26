@@ -37,6 +37,9 @@ class NetworkQualityMetrics(models.Model):
         ('lobatse', 'Lobatse'),
         ('palapye', 'Palapye'),
         ('selibe_phikwe', 'Selibe Phikwe'),
+        ('gantsi', 'Gantsi'),
+        ('nahalapye', 'Mahalapye'),
+        
     )
     
     provider = models.ForeignKey(TelecomProvider, on_delete=models.CASCADE, related_name='metrics')

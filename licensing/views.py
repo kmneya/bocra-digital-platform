@@ -284,7 +284,7 @@ def officer_license_list(request):
     context = {
         'applications': applications,
         'total_applications': total_applications,
-        'pending_review': pending_review,
+        'pending': pending_review,
         'under_review': under_review,
         'approved': approved,
         'rejected': rejected,

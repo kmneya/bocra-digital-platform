@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <!-- Messages Section -->
+    {% if messages %}
+    <div class="mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Welcome Section - Exactly like citizen dashboard -->
+    <div class="welcome-section text-center animate-fade-in">
+        <h1 class="fw-bold">Network Quality Monitoring</h1>
+        <p class="text-muted">Real-time monitoring of telecommunications service quality in Botswana</p>
+        <div class="d-flex justify-content-center gap-4 mt-3">
+            <img src="{% static 'images/mascom-logo.png' %}" alt="Mascom" height="45">
+            <img src="{% static 'images/orange-logo.png' %}" alt="Orange" height="45">
+            <img src="{% static 'images/btc-logo.jpeg' %}" alt="BTC" height="45">
+        </div>
+    </div>
+    
+    <!-- Stats Cards - 3 columns like citizen dashboard -->
+    <div class="row mb-4">
+        {% for data in provider_data %}
+        <div class="col-md-4 mb-3">
+            <div class="card dashboard-card text-center h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if data.provider.name == 'Mascom' %}
+                            <img src="{% static 'images/mascom-logo.png' %}" alt="Mascom" height="50">
+                        {% elif data.provider.name == 'Orange' %}
+                            <img src="{% static 'images/orange-logo.png' %}" alt="Orange" height="50">
+                        {% elif data.provider.name == 'BTC' %}
+                            <img src="{% static 'images/btc-logo.jpeg' %}" alt="BTC" height="50">
+                        {% endif %}
+                    </div>
+                    
+                    {% if data.today_metrics %}
+                    <div class="row mt-3">
+                        <div class="col-6 mb-2">
+                            <div class="p-2 bg-light rounded">
+                                <i class="fas fa-tachometer-alt fa-2x text-primary mb-1"></i>
+                                <h4 class="mb-0">{{ data.today_metrics.avg_throughput|default:"0"|floatformat:1 }}</h4>
+                                <small>Mbps</small>
+                                <div class="small text-muted">Throughput</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="p-2 bg-light rounded">
+                                <i class="fas fa-clock fa-2x text-primary mb-1"></i>
+                                <h4 class="mb-0">{{ data.today_metrics.latency|default:"0"|floatformat:0 }}</h4>
+                                <small>ms</small>
+                                <div class="small text-muted">Latency</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <i class="fas fa-chart-line fa-2x text-success mb-1"></i>
+                                <h4 class="mb-0 text-success">{{ data.today_metrics.uptime_percentage|default:"99.9"|floatformat:2 }}%</h4>
+                                <div class="small text-muted">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <i class="fas fa-exclamation-triangle fa-2x {% if data.active_incidents > 0 %}text-danger{% else %}text-muted{% endif %} mb-1"></i>
+                                <h4 class="mb-0 {% if data.active_incidents > 0 %}text-danger{% endif %}">
+                                    {{ data.active_incidents }}
+                                </h4>
+                                <div class="small text-muted">Incidents</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-chart-line me-2"></i>No data available
+                    </div>
+                    {% endif %}
+                    
+                    <hr class="my-3">
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">7-day Avg Latency:</span>
+                            <strong>{{ data.weekly_avg.avg_latency|floatformat:1|default:"-" }} ms</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">7-day Avg Throughput:</span>
+                            <strong>{{ data.weekly_avg.avg_throughput|floatformat:1|default:"-" }} Mbps</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Charts Row - Full width 2 columns -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-line text-primary me-2"></i>Latency Trends (Last 7 Days)</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadChart('latencyChart', 'latency_trends.png')">
+                        <i class="fas fa-download me-1"></i>Download
+                    </button>
+                </div>
+                <div class="card-body">
+                    <canvas id="latencyChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-tachometer-alt text-primary me-2"></i>Throughput Trends (Last 7 Days)</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadChart('throughputChart', 'throughput_trends.png')">
+                        <i class="fas fa-download me-1"></i>Download
+                    </button>
+                </div>
+                <div class="card-body">
+                    <canvas id="throughputChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Spectrum Analysis - Full width -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-waveform text-primary me-2"></i>Spectrum Analysis</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadChart('spectrumChart', 'spectrum_analysis.png')">
+                        <i class="fas fa-download me-1"></i>Download
+                    </button>
+                </div>
+                <div class="card-body">
+                    <canvas id="spectrumChart" height="200"></canvas>
+                    
+                    <div class="row mt-4">
+                        {% for data in spectrum_data|slice:":3" %}
+                        <div class="col-md-4 mt-2">
+                            <div class="alert alert-info small mb-0">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    {% if data.provider.name == 'Mascom' %}
+                                        <img src="{% static 'images/mascom-logo.png' %}" alt="Mascom" height="20">
+                                    {% elif data.provider.name == 'Orange' %}
+                                        <img src="{% static 'images/orange-logo.png' %}" alt="Orange" height="20">
+                                    {% elif data.provider.name == 'BTC' %}
+                                        <img src="{% static 'images/btc-logo.jpeg' %}" alt="BTC" height="20">
+                                    {% endif %}
+                                    <strong>{{ data.provider.name }} - {{ data.frequency_band }}</strong>
+                                </div>
+                                <span class="small">Avg Power: {{ data.avg_power_dbm|floatformat:1 }} dBm | Noise Floor: {{ data.noise_floor|floatformat:1 }} dBm</span>
+                                {% if data.interference_detected %}
+                                <span class="badge bg-danger ms-2">Interference</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Incidents Table - Full width -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bell text-primary me-2"></i>Active Network Incidents</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="exportTableToCSV()">
+                        <i class="fas fa-file-csv me-1"></i>Export CSV
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="incidentsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Provider</th>
+                                    <th>Incident</th>
+                                    <th>Severity</th>
+                                    <th>Duration</th>
+                                    <th>Affected Areas</th>
+                                </thead>
+                                <tbody>
+                                    {% for incident in active_incidents %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if incident.provider.name == 'Mascom' %}
+                                                    <img src="{% static 'images/mascom-logo.png' %}" alt="Mascom" height="25">
+                                                {% elif incident.provider.name == 'Orange' %}
+                                                    <img src="{% static 'images/orange-logo.png' %}" alt="Orange" height="25">
+                                                {% elif incident.provider.name == 'BTC' %}
+                                                    <img src="{% static 'images/btc-logo.jpeg' %}" alt="BTC" height="25">
+                                                {% endif %}
+                                                <span class="fw-bold">{{ incident.provider.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>{{ incident.title }}</td>
+                                        <td>
+                                            <span class="badge {% if incident.severity == 'critical' %}bg-danger{% elif incident.severity == 'high' %}bg-warning{% else %}bg-info{% endif %}">
+                                                {{ incident.get_severity_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ incident.duration_minutes }} minutes</td>
+                                        <td>{{ incident.affected_regions|truncatechars:40 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-check-circle fa-2x text-success mb-2 d-block"></i>
+                                            <p class="text-muted mb-0">No active incidents - All systems operational</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Regional QoS Map - Full width -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary me-2"></i>Regional Quality of Service</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="exportRegionalToCSV()">
+                        <i class="fas fa-file-csv me-1"></i>Export CSV
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="regionalQos">
+                        {% for region, metrics in regional_qos.items %}
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card bg-light h-100">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-city fa-2x text-primary mb-2"></i>
+                                    <h6 class="fw-bold mb-2">{{ region }}</h6>
+                                    <div class="small">
+                                        <div>📶 {{ metrics.throughput }} Mbps</div>
+                                        <div>⏱️ {{ metrics.latency }} ms</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.welcome-section {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    padding: 30px 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.welcome-section h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.welcome-section p {
+    margin: 10px 0 0 0;
+}
+
+.dashboard-card {
+    background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+    transition: transform 0.3s ease;
+    border: none;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+    border-radius: 10px;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(135, 206, 235, 0.08);
+}
+
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+.card-header {
+    border-bottom: 2px solid var(--bocra-sky);
+    padding: 15px 20px;
+}
+
+canvas {
+    max-height: 300px;
+    width: 100%;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Chart Download Function
+    function downloadChart(chartId, filename) {
+        const canvas = document.getElementById(chartId);
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+    
+    // Export Table to CSV
+    function exportTableToCSV() {
+        const table = document.getElementById('incidentsTable');
+        const rows = table.querySelectorAll('tr');
+        const csvData = [];
+        
+        rows.forEach(row => {
+            const rowData = [];
+            const cols = row.querySelectorAll('th, td');
+            cols.forEach(col => {
+                let text = col.innerText.trim();
+                rowData.push(text);
+            });
+            csvData.push(rowData.join(','));
+        });
+        
+        const csvContent = csvData.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'active_incidents.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // Export Regional QoS to CSV
+    function exportRegionalToCSV() {
+        const regionalDiv = document.getElementById('regionalQos');
+        const cards = regionalDiv.querySelectorAll('.col-md-3');
+        const csvData = [['Region', 'Throughput (Mbps)', 'Latency (ms)']];
+        
+        cards.forEach(card => {
+            const region = card.querySelector('h6').innerText;
+            const metrics = card.querySelectorAll('.small div');
+            const throughput = metrics[0].innerText.split(' ')[1];
+            const latency = metrics[1].innerText.split(' ')[1];
+            csvData.push([region, throughput, latency]);
+        });
+        
+        const csvContent = csvData.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = 'regional_qos.csv';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // Latency Chart
+    const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+    const trendData = {{ trend_data|safe }};
+    
+    if (trendData && trendData.length > 0 && trendData[0].data && trendData[0].data.length > 0) {
+        const latencyDatasets = trendData.map(provider => ({
+            label: provider.provider,
+            data: provider.data.map(d => d.avg_latency),
+            borderColor: provider.color,
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }));
+        
+        new Chart(latencyCtx, {
+            type: 'line',
+            data: {
+                labels: trendData[0]?.data.map(d => d.date) || [],
+                datasets: latencyDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} ms` } }
+                }
+            }
+        });
+        
+        // Throughput Chart
+        const throughputCtx = document.getElementById('throughputChart').getContext('2d');
+        const throughputDatasets = trendData.map(provider => ({
+            label: provider.provider,
+            data: provider.data.map(d => d.avg_throughput),
+            borderColor: provider.color,
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            fill: false,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }));
+        
+        new Chart(throughputCtx, {
+            type: 'line',
+            data: {
+                labels: trendData[0]?.data.map(d => d.date) || [],
+                datasets: throughputDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} Mbps` } }
+                }
+            }
+        });
+    }
+    
+    // Spectrum Chart
+    const spectrumCtx = document.getElementById('spectrumChart').getContext('2d');
+    new Chart(spectrumCtx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 40}, (_, i) => 2100 + i * 2.5),
+            datasets: [
+                {
+                    label: 'Mascom',
+                    data: Array.from({length: 40}, () => Math.random() * 25 - 75),
+                    borderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.05)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0
+                },
+                {
+                    label: 'Orange',
+                    data: Array.from({length: 40}, () => Math.random() * 25 - 75),
+                    borderColor: '#FFA500',
+                    backgroundColor: 'rgba(255, 165, 0, 0.05)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0
+                },
+                {
+                    label: 'BTC',
+                    data: Array.from({length: 40}, () => Math.random() * 25 - 75),
+                    borderColor: '#4ECDC4',
+                    backgroundColor: 'rgba(78, 205, 196, 0.05)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)} dBm` } }
+            },
+            scales: {
+                y: { title: { display: true, text: 'Power (dBm)' } },
+                x: { title: { display: true, text: 'Frequency (MHz)' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

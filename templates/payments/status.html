@@ -111,16 +111,6 @@
                     </div>
                     {% endif %}
                     
-                    <!-- Payment Gateway Response -->
-                    {% if payment.gateway_response %}
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5>Payment Gateway Information</h5>
-                            <pre class="bg-light p-3 rounded small mb-0">{{ payment.gateway_response|safe }}</pre>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 justify-content-center">
                         {% if payment.status != 'completed' and can_verify %}

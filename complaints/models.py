@@ -55,7 +55,7 @@ class Complaint(models.Model):
     sla_hours = models.IntegerField(default=48)
 
     def __str__(self):
-        return self.title
+        return self.name
     
 class ComplaintUpdate(models.Model):
     """Audit trail for complaint updates"""

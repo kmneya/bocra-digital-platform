@@ -86,8 +86,6 @@ def officer_complaint_list(request):
     # By type
     by_type = complaints.values('category').annotate(count=Count('id'))
     
-    # By service provider
-    by_provider = complaints.values('company').annotate(count=Count('id'))
     
     context = {
         'complaints': complaints,
@@ -97,7 +95,6 @@ def officer_complaint_list(request):
         'resolved': resolved,
         'closed': closed,
         'by_type': by_type,
-        'by_provider': by_provider,
     }
     
     return render(request, 'complaints/officer_list.html', context)

@@ -12,49 +12,41 @@
         </div>
         
         <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-md-2 mb-3">
-                <div class="card bg-primary text-white">
-                    <div class="card-body text-center">
-                        <h3>{{ total }}</h3>
-                        <small>Total Complaints</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 mb-3">
-                <div class="card bg-warning text-dark">
-                    <div class="card-body text-center">
-                        <h3>{{ pending }}</h3>
-                        <small>Pending</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 mb-3">
-                <div class="card bg-info text-white">
-                    <div class="card-body text-center">
-                        <h3>{{ investigating }}</h3>
-                        <small>Investigating</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 mb-3">
-                <div class="card bg-success text-white">
-                    <div class="card-body text-center">
-                        <h3>{{ resolved }}</h3>
-                        <small>Resolved</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 mb-3">
-                <div class="card bg-secondary text-white">
-                    <div class="card-body text-center">
-                        <h3>{{ closed }}</h3>
-                        <small>Closed</small>
-                    </div>
-                </div>
+        <!-- Stats Cards - Centered -->
+<div class="row mb-4 justify-content-center">
+    <div class="col-md-2 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3>{{ total }}</h3>
+                <small>Total Complaints</small>
             </div>
         </div>
-        
+    </div>
+    <div class="col-md-2 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h3>{{ pending }}</h3>
+                <small>Pending</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3>{{ investigating }}</h3>
+                <small>Investigating</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3>{{ resolved }}</h3>
+                <small>Resolved</small>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Filters -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">
@@ -97,64 +89,56 @@
                 <h5 class="mb-0">All Consumer Complaints</h5>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="complaintsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Ref #</th>
-                                <th>Complainant</th>
-                                <th>Type</th>
-                                <th>Provider</th>
-                                <th>Status</th>
-                                <th>Submitted</th>
-                                <th>Assigned To</th>
-                                <th>Actions</th>
-                            </thead>
-                            <tbody>
-                                {% for complaint in complaints %}
-                                <tr class="complaint-row" data-status="{{ complaint.status }}" data-type="{{ complaint.complaint_type }}" data-provider="{{ complaint.service_provider }}">
-                                    <td class="fw-bold">{{ complaint.reference_number|default:"#"|add:complaint.id }}<td>
-                                    <td>{{ complaint.name }}</td>
-                                    <td><span class="badge bg-secondary">{{ complaint.get_complaint_type_display }}</span></td>
-                                    <td>{{ complaint.service_provider|default:"Not specified" }}</td>
-                                    <td>
-                                        {% if complaint.status == 'resolved' %}
-                                            <span class="badge bg-success">Resolved</span>
-                                        {% elif complaint.status == 'investigating' %}
-                                            <span class="badge bg-info">Investigating</span>
-                                        {% elif complaint.status == 'closed' %}
-                                            <span class="badge bg-secondary">Closed</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ complaint.created_at|date:"M d, Y" }}</td>
-                                    <td>
-                                        {% if complaint.assigned_to %}
-                                            {{ complaint.assigned_to.username }}
-                                        {% else %}
-                                            <span class="text-muted">Unassigned</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="/complaints/officer/{{ complaint.id }}/" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Review
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <i class="fas fa-inbox fa-3x text-muted mb-2 d-block"></i>
-                                        No complaints found.
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0" id="complaintsTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Company</th>
+                    <th>Complainant</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for complaint in complaints %}
+                <tr class="complaint-row" data-status="{{ complaint.status }}" data-type="{{ complaint.category }}" data-provider="{{ complaint.service_provider }}">
+                    <td>{{ complaint.company|default:"—" }}</td>
+                    <td class="fw-bold">{{ complaint.name }}</td>
+                    <td>
+                        <span class="badge bg-secondary">{{ complaint.category}}</span>
+                    </td>
+                    <td>{{ complaint.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if complaint.status == 'resolved' %}
+                            <span class="badge bg-success">Resolved</span>
+                        {% elif complaint.status == 'investigating' %}
+                            <span class="badge bg-info">Investigating</span>
+                        {% elif complaint.status == 'closed' %}
+                            <span class="badge bg-secondary">Closed</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/complaints/officer/{{ complaint.id }}/" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> Review
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-2 d-block"></i>
+                        No complaints found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
         </div>
     </div>
 </div>
