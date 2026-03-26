@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'monitoring',
     'payments',
+    'chatbot',
+    
 ]
 
 MIDDLEWARE = [
