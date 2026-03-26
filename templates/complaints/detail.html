@@ -20,13 +20,6 @@
                     </div>
                     
                     <div class="mb-3">
-                        <strong>Priority:</strong>
-                        <span class="badge {% if complaint.priority == 'high' %}bg-danger{% elif complaint.priority == 'medium' %}bg-warning{% else %}bg-secondary{% endif %}">
-                            {{ complaint.priority|default:"medium" }}
-                        </span>
-                    </div>
-                    
-                    <div class="mb-3">
                         <strong>Category:</strong> {{ complaint.category }}
                     </div>
                     

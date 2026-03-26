@@ -14,7 +14,6 @@
                             <th>Comapny</th>
                             <th>Category</th>
                             <th>Status</th>
-                            <th>Priority</th>
                             <th>Date</th>
                             <th>Action</th>
                         </thead>
@@ -27,11 +26,6 @@
                                 <td>
                                     <span class="badge {% if complaint.status == 'resolved' %}bg-success{% elif complaint.status == 'in_progress' %}bg-info{% else %}bg-warning{% endif %}">
                                         {{ complaint.status }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge {% if complaint.priority == 'high' %}bg-danger{% elif complaint.priority == 'medium' %}bg-warning{% else %}bg-secondary{% endif %}">
-                                        {{ complaint.priority|default:"medium" }}
                                     </span>
                                 </td>
                                 <td>{{ complaint.created_at|date:"M d, Y" }}</td>

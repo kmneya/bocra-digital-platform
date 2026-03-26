@@ -32,4 +32,8 @@ urlpatterns = [
     # Settings
     path('settings/', views.officer_settings, name='officer_settings'),
     path('settings/notifications/', views.notification_settings, name='notification_settings'),
+
+    # Admin User Management
+    path('admin/users/', views.admin_users, name='admin_users'),
+    path('admin/users/create/', views.admin_create_user, name='admin_create_user'),
 ]

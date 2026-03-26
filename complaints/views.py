@@ -19,7 +19,7 @@ def create_complaint(request):
             complaint = form.save(commit=False)
             complaint.user = request.user
             complaint.save()
-            messages.success(request, f'Your complaint has been submitted successfully! Reference: {complaint.reference_number}')
+            messages.success(request, f'Your complaint has been submitted successfully! {complaint.name}')
             return redirect('complaint_list')
     else:
         # Pass the logged-in user to the form for auto-population

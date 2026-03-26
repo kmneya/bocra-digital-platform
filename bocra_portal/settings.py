@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bocra_portal.context_processors.admin_stats'
             ],
         },
     },
@@ -130,6 +131,13 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/redirect-dashboard/'
+# Login/Logout URLs
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/auth/redirect-dashboard/'
+LOGOUT_REDIRECT_URL = '/auth/login/'
+
+# Admin URL (keep this for admin panel)
+ADMIN_URL = 'admin/'
 
 # Configure CORS
 CORS_ALLOWED_ORIGINS = [

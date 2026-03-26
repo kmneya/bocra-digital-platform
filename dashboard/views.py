@@ -1,23 +1,39 @@
-from django.db import models
+from datetime import timedelta
 from django.contrib import messages
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.db import models
+from django.db.models import Count, Avg, Sum
+from django.db.models.functions import TruncDate
+from django.shortcuts import render, redirect
+from django.utils import timezone
 from complaints.models import Complaint
 from licensing.models import LicenseApplication
-from django.db.models import Count
-from django.db.models.functions import TruncDate
-from django.utils import timezone
-from datetime import timedelta
-
+from monitoring.models import TelecomProvider, NetworkQualityMetrics, NetworkIncident
+from payments.models import PaymentTransaction
+from users.models import User
 
 @login_required
 def redirect_dashboard(request):
-    """Redirect to the appropriate dashboard based on user role"""
-    if request.user.role == 'officer':
-        return redirect('officer_dashboard')
-    elif request.user.role == 'admin':
+    """Redirect to appropriate dashboard based on role"""
+    user = request.user
+    
+    # Debug: Print user info
+    print(f"Redirecting user: {user.username}")
+    print(f"Role: {user.role}")
+    print(f"Is Superuser: {user.is_superuser}")
+    
+    # Check superuser first
+    if user.is_superuser:
+        print("Redirecting to admin_dashboard (superuser)")
         return redirect('admin_dashboard')
+    elif user.role == 'admin':
+        print("Redirecting to admin_dashboard (admin role)")
+        return redirect('admin_dashboard')
+    elif user.role == 'officer':
+        print("Redirecting to officer_dashboard")
+        return redirect('officer_dashboard')
     else:
+        print("Redirecting to citizen_dashboard")
         return redirect('citizen_dashboard')
 
 @login_required
@@ -115,20 +131,165 @@ def officer_dashboard(request):
     
     return render(request, 'dashboard/officer.html', context)
 
+
 @login_required
 def admin_dashboard(request):
-    return render(request, 'dashboard/admin.html')
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from complaints.models import Complaint
-from licensing.models import LicenseApplication
-from monitoring.models import TelecomProvider, NetworkQualityMetrics, NetworkIncident
-from django.db.models import Count, Avg
-from django.utils import timezone
-from datetime import timedelta
+    """Admin dashboard - ADMIN ONLY"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('citizen_dashboard')
+    
+    # Get current date ranges
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    
+    # ========== COMPLAINTS STATISTICS ==========
+    total_complaints = Complaint.objects.count()
+    resolved_complaints = Complaint.objects.filter(status='resolved').count()
+    pending_complaints = Complaint.objects.filter(status='pending').count()
+    under_review = Complaint.objects.filter(status='investigating').count()
+    
+    # Resolution rate
+    resolution_rate = 0
+    if total_complaints > 0:
+        resolution_rate = round((resolved_complaints / total_complaints) * 100, 1)
+    
+    # Complaints by status (for chart)
+    complaints_by_status = Complaint.objects.values('status').annotate(
+        total=Count('id')
+    )
+    
+    # Complaints over time (last 30 days)
+    complaints_trend = Complaint.objects.filter(
+        created_at__gte=month_ago
+    ).extra({'date': "date(created_at)"}).values('date').annotate(
+        count=Count('id')
+    ).order_by('date')
+    
+    # Average resolution time
+    avg_resolution = Complaint.objects.filter(
+        status='resolved',
+        resolved_at__isnull=False
+    ).annotate(
+        resolution_time=models.ExpressionWrapper(
+            models.F('resolved_at') - models.F('created_at'),
+            output_field=models.DurationField()
+        )
+    ).aggregate(avg=models.Avg('resolution_time'))
+    
+    avg_hours = 0
+    if avg_resolution['avg']:
+        avg_hours = int(avg_resolution['avg'].total_seconds() / 3600)
+    
+    # ========== LICENSING STATISTICS ==========
+    total_licenses = LicenseApplication.objects.count()
+    approved_licenses = LicenseApplication.objects.filter(status='approved').count()
+    pending_licenses = LicenseApplication.objects.filter(status='pending').count()
+    rejected_licenses = LicenseApplication.objects.filter(status='rejected').count()
+    
+    # Licenses by type
+    licenses_by_type = LicenseApplication.objects.values('license_type').annotate(
+        total=Count('id')
+    )
+    
+    # ========== PAYMENT STATISTICS ==========
+    total_revenue = PaymentTransaction.objects.filter(
+        status='completed'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    monthly_revenue = PaymentTransaction.objects.filter(
+        status='completed',
+        paid_at__date__gte=month_ago
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    weekly_revenue = PaymentTransaction.objects.filter(
+        status='completed',
+        paid_at__date__gte=week_ago
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    pending_payments = PaymentTransaction.objects.filter(status='pending').count()
+    
+    # ========== OFFICER PERFORMANCE ==========
+    officers = User.objects.filter(role='officer')
+    officer_performance = []
+    
+    for officer in officers:
+        assigned_complaints = Complaint.objects.filter(assigned_to=officer).count()
+        resolved_by_officer = Complaint.objects.filter(
+            assigned_to=officer,
+            status='resolved'
+        ).count()
+        
+        officer_performance.append({
+            'name': officer.get_full_name() or officer.username,
+            'assigned': assigned_complaints,
+            'resolved': resolved_by_officer,
+            'resolution_rate': round((resolved_by_officer / assigned_complaints * 100), 1) if assigned_complaints > 0 else 0
+        })
+    
+    # ========== NETWORK MONITORING ==========
+    active_incidents = NetworkIncident.objects.filter(is_resolved=False).count()
+    
+    # ========== SYSTEM CONFIGURATION ==========
+    license_fees = {
+        'aircraft_radio': 500.00,
+        'cellular_details': 2500.00,
+        'broadcasting_lis': 1500.00,
+        'vans_lis': 1000.00,
+        'point_to_to_lis': 800.00,
+        'satellite_service_lis': 1200.00,
+        'amateur_rad_lis': 300.00,
+        'citizen_band_rad_lis': 250.00,
+    }
+    
+    # ========== SLA COMPLIANCE ==========
+    # Calculate complaints resolved within SLA (48 hours default)
+    sla_compliant = 0
+    for complaint in Complaint.objects.filter(status='resolved'):
+        if complaint.resolved_at and complaint.created_at:
+            resolution_hours = (complaint.resolved_at - complaint.created_at).total_seconds() / 3600
+            if resolution_hours <= 48:
+                sla_compliant += 1
+    
+    sla_compliance = 0
+    if resolved_complaints > 0:
+        sla_compliance = round((sla_compliant / resolved_complaints) * 100, 1)
+    
+    context = {
+        # Complaints
+        'total_complaints': total_complaints,
+        'resolved_complaints': resolved_complaints,
+        'pending_complaints': pending_complaints,
+        'under_review': under_review,
+        'resolution_rate': resolution_rate,
+        'complaints_by_status': complaints_by_status,
+        'complaints_trend': list(complaints_trend),
+        'avg_resolution_time': avg_hours,
+        
+        # Licensing
+        'total_licenses': total_licenses,
+        'approved_licenses': approved_licenses,
+        'pending_licenses': pending_licenses,
+        'rejected_licenses': rejected_licenses,
+        'licenses_by_type': licenses_by_type,
+        
+        # Payments
+        'total_revenue': total_revenue,
+        'monthly_revenue': monthly_revenue,
+        'weekly_revenue': weekly_revenue,
+        'pending_payments': pending_payments,
+        
+        # Officer Performance
+        'officer_performance': officer_performance,
+        
+        # System
+        'active_incidents': active_incidents,
+        'license_fees': license_fees,
+        'sla_compliance': sla_compliance,
+    }
+    
+    return render(request, 'dashboard/admin.html', context)
 
 # ... keep your existing citizen_dashboard, officer_dashboard, admin_dashboard, redirect_dashboard
 
@@ -349,3 +510,55 @@ def notification_settings(request):
         return redirect('citizen_dashboard')
     
     return render(request, 'dashboard/notification_settings.html')
+
+
+@login_required
+def admin_users(request):
+    """Admin view to manage users"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('citizen_dashboard')
+    
+    users = User.objects.all().order_by('-date_joined')
+    
+    context = {
+        'users': users,
+        'total_users': users.count(),
+        'officers': users.filter(role='officer').count(),
+        'citizens': users.filter(role='citizen').count(),
+        'admins': users.filter(is_superuser=True).count(),
+    }
+    
+    return render(request, 'dashboard/admin_users.html', context)
+
+
+@login_required
+def admin_create_user(request):
+    """Admin view to create new users"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('citizen_dashboard')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        role = request.POST.get('role')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+        else:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password
+            )
+            user.role = role
+            user.save()
+            
+            messages.success(request, f'User {username} created successfully as {role}.')
+            return redirect('admin_users')
+    
+    return render(request, 'dashboard/admin_create_user.html')

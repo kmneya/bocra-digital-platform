@@ -1,0 +1,31 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .results table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .results thead th {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+    }
+    .results tbody tr:hover {
+        background-color: rgba(135, 206, 235, 0.1);
+    }
+    .paginator {
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    .object-tools a {
+        background: var(--bocra-sky-dark);
+        color: var(--bocra-dark);
+    }
+    .object-tools a:hover {
+        background: var(--bocra-sky);
+    }
+</style>
+{% endblock %}

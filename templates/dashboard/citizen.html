@@ -2,6 +2,29 @@
 {% load static %}
 
 {% block content %}
+<!-- Messages Section - Only show on pages where messages exist -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="alert-{{ forloop.counter }}">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            var bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+</script>
+{% endif %}
 <div class="container">
     <!-- Welcome Section - Reduced -->
     <div class="welcome-section text-center animate-fade-in">
@@ -90,27 +113,26 @@
         </div>
     </div>
     
-    <!-- Quick Actions -->
-    <div class="row mt-4">
-        <div class="col-md-6 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5><i class="fas fa-file-signature me-2"></i>Apply for License</h5>
-                    <p class="text-muted">Submit a new license application online</p>
-                    <div class="d-flex gap-2">
-                        <a href="/licenses/apply/" class="btn btn-outline-primary">Apply Now</a>
-                        <a href="/licenses/" class="btn btn-outline-secondary">View My Licenses</a>
-                    </div>
+    <!-- Quick Actions - Centered -->
+<div class="row mt-4 justify-content-center">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-file-signature me-2"></i>Apply for License</h5>
+                <p class="text-muted">Submit a new license application online</p>
+                <div class="d-flex gap-2">
+                    <a href="/licenses/apply/" class="btn btn-outline-primary">Apply Now</a>
+                    <a href="/licenses/" class="btn btn-outline-secondary">View My Licenses</a>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5><i class="fas fa-chart-line me-2"></i>My Tariffs</h5>
-                    <p class="text-muted">View telecommunications service quality reports</p>
-                    <a href="#" class="btn btn-outline-primary">View Reports →</a>
-                </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5><i class="fas fa-chart-line me-2"></i>My Tariffs</h5>
+                <p class="text-muted">View telecommunications service quality reports</p>
+                <a href="#" class="btn btn-outline-primary">View Reports →</a>
             </div>
         </div>
     </div>

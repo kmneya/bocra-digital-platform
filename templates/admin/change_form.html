@@ -1,0 +1,28 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .submit-row input {
+        background: linear-gradient(135deg, #1E88E5, #0d47a1);
+        border: none;
+    }
+    .submit-row input:hover {
+        background: linear-gradient(135deg, #0d47a1, #1E88E5);
+    }
+    .submit-row input[name="_delete"] {
+        background: #dc3545;
+    }
+    .submit-row input[name="_delete"]:hover {
+        background: #c82333;
+    }
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+    }
+    .selector-chosen h2 {
+        background: var(--bocra-sky-dark) !important;
+    }
+</style>
+{% endblock %}

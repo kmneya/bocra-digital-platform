@@ -19,11 +19,33 @@ class UserLoginView(LoginView):
             pass
         return super().get(request, *args, **kwargs)
     
+    
+    
     def form_valid(self, form):
-        """Handle successful login"""
         response = super().form_valid(form)
-        messages.success(self.request, f'Welcome back, {self.request.user.username}!')
-        return response
+        user = self.request.user
+        messages.success(self.request, f'Welcome back, {user.username}!')
+        
+        # Debug: Print user info to console
+        print(f"User: {user.username}")
+        print(f"Role: {user.role}")
+        print(f"Is Superuser: {user.is_superuser}")
+        
+        # Redirect based on user type
+        # Check superuser first, then role
+        if user.is_superuser:
+            print("Redirecting to admin_dashboard (superuser)")
+            return redirect('admin_dashboard')
+        elif user.role == 'admin':
+            print("Redirecting to admin_dashboard (admin role)")
+            return redirect('admin_dashboard')
+        elif user.role == 'officer':
+            print("Redirecting to officer_dashboard")
+            return redirect('officer_dashboard')
+        else:
+            print("Redirecting to citizen_dashboard")
+            return redirect('citizen_dashboard')
+            
     
     def form_invalid(self, form):
         """Handle failed login - show error at the bottom of the card"""
@@ -68,15 +90,6 @@ def register(request):
     return render(request, 'users/register.html', {'form': form})
 
 
-@login_required
-def redirect_dashboard(request):
-    """Redirect to appropriate dashboard based on role"""
-    if request.user.role == 'officer':
-        return redirect('officer_dashboard')
-    elif request.user.role == 'admin':
-        return redirect('admin_dashboard')
-    else:
-        return redirect('citizen_dashboard')
     
 
 @login_required
@@ -92,3 +105,27 @@ def update_profile(request):
         form = UserProfileForm(instance=request.user)
     
     return render(request, 'users/profile.html', {'form': form})
+
+@login_required
+def redirect_dashboard(request):
+    """Redirect to appropriate dashboard based on role"""
+    user = request.user
+    
+    # Debug: Print user info
+    print(f"Redirecting user: {user.username}")
+    print(f"Role: {user.role}")
+    print(f"Is Superuser: {user.is_superuser}")
+    
+    # Check superuser first
+    if user.is_superuser:
+        print("Redirecting to admin_dashboard (superuser)")
+        return redirect('admin_dashboard')
+    elif user.role == 'admin':
+        print("Redirecting to admin_dashboard (admin role)")
+        return redirect('admin_dashboard')
+    elif user.role == 'officer':
+        print("Redirecting to officer_dashboard")
+        return redirect('officer_dashboard')
+    else:
+        print("Redirecting to citizen_dashboard")
+        return redirect('citizen_dashboard')

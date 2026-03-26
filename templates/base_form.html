@@ -1,0 +1,335 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOCRA Digital Platform - {{ title|default:"Form" }}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+            min-height: 100vh;
+        }
+        
+        /* Navbar Styling - Light Blue Version */
+        .navbar {
+            background: linear-gradient(135deg, #87CEEB 0%, #6bb5d6 100%);
+            padding: 1rem 0;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: #1a2a3a !important;
+            font-size: 1.6rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .navbar-nav {
+            gap: 0.5rem;
+        }
+        
+        .navbar-nav .nav-link {
+            color: #1a2a3a !important;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-nav .btn-outline-dark {
+            color: #1a2a3a;
+            border-color: #1a2a3a;
+            border-radius: 25px;
+            padding: 8px 20px;
+            margin-left: 10px;
+        }
+        
+        .navbar-nav .btn-outline-dark:hover {
+            background-color: #1a2a3a;
+            color: white;
+        }
+        
+        .navbar-nav .btn-primary {
+            background-color: #1a2a3a;
+            border-color: #1a2a3a;
+            border-radius: 25px;
+            padding: 8px 20px;
+            margin-left: 10px;
+        }
+        
+        /* Form Wrapper */
+        .form-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 72px);
+            width: 100%;
+            padding: 40px 20px;
+            position: relative;
+        }
+        
+        .form-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Apply glassmorphism to any card inside */
+        .form-container .card {
+            background: rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes glowPulse {
+            0% {
+                box-shadow: 0 0 10px rgba(30, 136, 229, 0.3);
+                border-color: rgba(30, 136, 229, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(30, 136, 229, 0.7);
+                border-color: rgba(30, 136, 229, 0.7);
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(30, 136, 229, 0.3);
+                border-color: rgba(30, 136, 229, 0.3);
+            }
+        }
+        
+        .form-container .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 35px rgba(30, 136, 229, 0.6);
+        }
+        
+        /* Form content styling */
+        .form-container .card-body {
+            background: transparent !important;
+            color: #fff;
+        }
+        
+        .form-container .card-header {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-container .card-header h4, 
+        .form-container .card-header h5,
+        .form-container .card-header h6 {
+            color: #fff;
+        }
+        
+        .form-container .form-label {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .form-container .form-control,
+        .form-container .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+        
+        .form-container .form-control:focus,
+        .form-container .form-select:focus {
+            border-color: #1E88E5;
+            box-shadow: 0 0 0 0.2rem rgba(30, 136, 229, 0.25);
+        }
+        
+        .form-container .form-control[readonly] {
+            background: rgba(255, 255, 255, 0.7);
+            cursor: not-allowed;
+        }
+        
+        .form-container .input-group-text {
+            background: rgba(30, 136, 229, 0.8);
+            border: none;
+            color: white;
+        }
+        
+        .form-container .btn-primary {
+            background: linear-gradient(135deg, #1E88E5, #0d47a1);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .form-container .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
+        }
+        
+        .form-container .btn-outline-secondary {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+        
+        .form-container .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            color: white;
+        }
+        
+        .form-container .alert {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .form-container .alert-success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .form-container .alert-danger {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .form-container .alert-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .form-container .alert-info {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .form-container .bg-light {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        .form-container .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+        
+        .form-container .border-bottom {
+            border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        
+        .form-container hr {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-container .badge {
+            background: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'images/bocra-logo.png' %}" alt="BOCRA Logo" height="40" onerror="this.src='https://via.placeholder.com/40x40?text=B'">
+                BOCRA
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                            Services
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/services/telecommunications/">Telecommunications</a></li>
+                            <li><a class="dropdown-item" href="/services/broadcasting/">Broadcasting</a></li>
+                            <li><a class="dropdown-item" href="/services/postal/">Postal Services</a></li>
+                            <li><a class="dropdown-item" href="/services/internet/">Internet & ICT</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/licenses/apply/">Apply for License</a></li>
+                            <li><a class="dropdown-item" href="/complaints/create/">Submit Complaint</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/documents/">Documents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about/">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact/">Contact</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard/">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="POST" action="/auth/logout/" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary ms-2">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-outline-dark ms-2" href="/auth/login/">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="/auth/register/">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Form Content -->
+    <div class="form-wrapper">
+        <div class="form-container">
+            {% block form_content %}
+            {% endblock %}
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

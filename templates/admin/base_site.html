@@ -1,0 +1,271 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | BOCRA Admin Panel{% endblock %}
+
+{% block branding %}
+<div class="branding-wrapper">
+    <a href="/" class="branding-link">
+        <div class="branding-content">
+            <span class="branding-title">BOCRA</span>
+            <div class="four-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+    </a>
+</div>
+{% endblock %}
+
+{% block userlinks %}
+    <div class="admin-userlinks">
+        <a href="/auth/logout/" class="logout-link">
+            <i class="fas fa-sign-out-alt"></i> LOG OUT
+        </a>
+    </div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Custom Admin Styling - Matching Homepage Navbar */
+    :root {
+        --bocra-sky: #87CEEB;
+        --bocra-sky-light: #a8dbff;
+        --bocra-sky-dark: #6bb5d6;
+        --bocra-dark: #1a2a3a;
+        --bocra-black: #000000;
+        --bocra-white: #ffffff;
+    }
+    
+    /* Header styling - matches homepage navbar size */
+    #header {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+        border-bottom: 2px solid white;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        position: relative;
+        padding: 12px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 70px;
+    }
+    
+    /* Clean header - no extra dots */
+    #header::before {
+        display: none;
+    }
+    
+    /* Branding wrapper */
+    .branding-wrapper {
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Clickable branding link */
+    .branding-link {
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    
+    .branding-link:hover {
+        transform: scale(1.02);
+    }
+    
+    .branding-content {
+        text-align: center;
+    }
+    
+    /* BOCRA title - matches homepage */
+    .branding-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--bocra-dark);
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    /* Four dots container */
+    .four-dots {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    /* Individual dots */
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    /* Dot colors - representing the four sectors */
+    .dot:nth-child(1) {
+        background-color: #1E88E5; /* Telecommunications - Blue */
+    }
+    
+    .dot:nth-child(2) {
+        background-color: #43A047; /* Broadcasting - Green */
+    }
+    
+    .dot:nth-child(3) {
+        background-color: #E53935; /* Postal - Red */
+    }
+    
+    .dot:nth-child(4) {
+        background-color: #FB8C00; /* Internet - Orange */
+    }
+    
+    /* Hover effect on dots */
+    .branding-link:hover .dot {
+        transform: scale(1.2);
+    }
+    
+    /* User links styling - simple and clean */
+    .admin-userlinks {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .admin-userlinks a {
+        color: var(--bocra-dark);
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        padding: 6px 16px;
+        border-radius: 25px;
+        text-decoration: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .admin-userlinks a:hover {
+        background-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        color: var(--bocra-dark);
+    }
+    
+    /* Hide Django's default welcome message */
+    #user-tools {
+        display: none;
+    }
+    
+    /* Module headers - keep consistent with theme */
+    .module h2, .module caption, .inline-group h2 {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+        border-radius: 8px 8px 0 0;
+        padding: 10px 15px;
+        font-weight: 600;
+    }
+    
+    /* Breadcrumbs */
+    div.breadcrumbs {
+        background: var(--bocra-dark);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    div.breadcrumbs a {
+        color: var(--bocra-sky);
+        transition: color 0.3s ease;
+    }
+    
+    div.breadcrumbs a:hover {
+        color: white;
+    }
+    
+    /* Buttons */
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .button:hover, input[type=submit]:hover, input[type=button]:hover {
+        background: linear-gradient(135deg, var(--bocra-sky-dark) 0%, var(--bocra-sky) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: var(--bocra-dark);
+        color: white;
+    }
+    
+    .button.default:hover, input[type=submit].default:hover {
+        background: #2c3e50;
+    }
+    
+    /* Dashboard styling */
+    .dashboard .module table th {
+        background: var(--bocra-sky);
+        color: var(--bocra-dark);
+        font-weight: 600;
+    }
+    
+    .dashboard .module table td a {
+        color: var(--bocra-dark);
+        transition: color 0.3s ease;
+    }
+    
+    .dashboard .module table td a:hover {
+        color: var(--bocra-sky-dark);
+    }
+    
+    /* Tables */
+    #result_list {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    #result_list thead th {
+        background: linear-gradient(135deg, var(--bocra-sky) 0%, var(--bocra-sky-dark) 100%);
+        color: var(--bocra-dark);
+    }
+    
+    #result_list tbody tr:hover {
+        background-color: rgba(135, 206, 235, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        #header {
+            flex-direction: column;
+            text-align: center;
+            gap: 10px;
+            padding: 12px 20px;
+            min-height: auto;
+        }
+        
+        .branding-title {
+            font-size: 1.3rem;
+        }
+        
+        .four-dots {
+            gap: 8px;
+        }
+        
+        .dot {
+            width: 6px;
+            height: 6px;
+        }
+    }
+</style>
+{% endblock %}
