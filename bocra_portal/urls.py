@@ -21,7 +21,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from .views import home, about, contact
 from users.views import redirect_dashboard
-#from chatbot import views as chatbot_views
+from chatbot import views as chatbot_views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -36,8 +36,9 @@ schema_view = get_schema_view(
 urlpatterns = [
    # path('chatbot/', chatbot_views.chatbot_view, name='chatbot'),
     #path('chatbot/', include('chatbot.urls')),
-    #path('api/chatbot/', chatbot_views.chatbot_api, name='chatbot_api'),
+    
     path('admin/', admin.site.urls),
+    path('api/chatbot/', chatbot_views.chatbot_api, name='chatbot_api'),
     path('', home, name='home'),
     path('auth/', include('users.urls')),
     path('about/', about, name='about'),
