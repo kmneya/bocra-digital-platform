@@ -2,212 +2,217 @@
 {% load static %}
 
 {% block content %}
-<!-- Login Section with Image -->
-<div class="login-section">
-    <div class="login-bg-image"></div>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="login-card">
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold">Welcome Back</h2>
-                        <p class="text-muted">Sign in to your account</p>
-                    </div>
-                    
-                    <!-- Only show login-specific messages here -->
-                    {% if messages %}
-                        {% for message in messages %}
-                            {% if message.tags == 'error' %}
-                                <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-                                    <i class="fas fa-exclamation-circle me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% elif message.tags == 'success' %}
-                                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <form method="POST">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" name="username" class="form-control login-input" placeholder="Enter your username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control login-input" placeholder="Enter your password" required>
-                        </div>
-                        
-                        <!-- Forgot Password Link -->
-                        <div class="text-end mb-3">
-                            <a href="{% url 'password_reset' %}" class="text-decoration-none small">
-                                <i class="fas fa-key me-1"></i>Forgot Password?
-                            </a>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100 py-2">
-                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
-                        </button>
-                    </form>
-                    
-                    <hr class="my-4">
-                    
-                    <div class="text-center">
-                        <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="text-primary">Register here</a></p>
-                    </div>
-                </div>
+<div class="login-wrapper">
+    <div class="wrapper">
+        <form method="post">
+            {% csrf_token %}
+            <h2>Welcome Back</h2>
+            
+            <div class="input-field">
+                <input type="text" name="username" id="username" required>
+                <label for="username">Username</label>
             </div>
-        </div>
+            
+            <div class="input-field">
+                <input type="password" name="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+            
+            <div class="forget">
+                <label for="remember">
+                    <input type="checkbox" id="remember">
+                    <p>Remember me</p>
+                </label>
+                <a href="#">Forgot password?</a>
+            </div>
+            
+            <button type="submit">Log In</button>
+            
+            <div class="register">
+                <p>Don't have an account? <a href="/auth/register/">Register</a></p>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-    .alert {
-        border-radius: 10px;
-        border: none;
-        font-size: 0.9rem;
-    }
-    .alert-danger {
-        background-color: #f8d7da;
-        border-left: 4px solid #dc3545;
-        color: #721c24;
-    }
-    .alert-success {
-        background-color: #d4edda;
-        border-left: 4px solid #28a745;
-        color: #155724;
-    }
-    .input-group-text {
-        background-color: var(--bocra-sky-dark);
-        color: var(--bocra-dark);
-        border: none;
-    }
-    .form-control:focus {
-        border-color: var(--bocra-sky);
-        box-shadow: 0 0 0 0.2rem rgba(135, 206, 235, 0.25);
-    }
-.login-section {
-    position: relative;
-    min-height: 100vh;
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@200;300;400;500;600;700&display=swap");
+
+.login-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    padding: 80px 0;
+    min-height: 100vh;
+    width: 100%;
+    padding: 0 10px;
+    position: relative;
 }
 
-.login-bg-image {
+.login-wrapper::before {
+    content: "";
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("{% static 'images/login-bg.png' %}");
-    background-size: cover;
+    background: url("{% static 'images/logo-bg.jpg' %}"), #000;
     background-position: center;
+    background-size: cover;
     z-index: 0;
 }
 
-.login-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-}
-
-.login-section .container {
+.wrapper {
+    width: 400px;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    background: rgba(255, 255, 255, 0.2);
     position: relative;
-    z-index: 2;
-}
-
-.login-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    z-index: 1;
     transition: all 0.3s ease;
     animation: glowPulse 2s ease-in-out infinite;
-}
-
-.login-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 35px rgba(30, 136, 229, 0.6);
 }
 
 @keyframes glowPulse {
     0% {
         box-shadow: 0 0 10px rgba(30, 136, 229, 0.3);
+        border-color: rgba(30, 136, 229, 0.3);
     }
     50% {
         box-shadow: 0 0 30px rgba(30, 136, 229, 0.7);
+        border-color: rgba(30, 136, 229, 0.7);
     }
     100% {
         box-shadow: 0 0 10px rgba(30, 136, 229, 0.3);
+        border-color: rgba(30, 136, 229, 0.3);
     }
 }
 
-.login-card h2 {
-    color: #333;
+.wrapper:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 35px rgba(30, 136, 229, 0.6);
 }
 
-.login-card .text-muted {
-    color: #666 !important;
+form {
+    display: flex;
+    flex-direction: column;
 }
 
-.login-card label {
-    color: #333;
+h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #000;
+    font-weight: 600;
+}
+
+.input-field {
+    position: relative;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
+}
+
+.input-field label {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    color: #000;
+    font-size: 16px;
+    pointer-events: none;
+    transition: 0.15s ease;
     font-weight: 500;
 }
 
-.login-input {
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    background: white;
-    padding: 12px 15px;
-    transition: all 0.3s ease;
-    color: #333;
-}
-
-.login-input:focus {
-    border-color: #1E88E5;
-    box-shadow: 0 0 10px rgba(30, 136, 229, 0.3);
-    outline: none;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, #1E88E5, #0d47a1);
+.input-field input {
+    width: 100%;
+    height: 40px;
+    background: transparent;
     border: none;
-    padding: 12px;
-    border-radius: 10px;
+    outline: none;
+    font-size: 16px;
+    color: #000;
+}
+
+.input-field input:focus ~ label,
+.input-field input:valid ~ label {
+    font-size: 0.8rem;
+    top: 0px;
+    transform: translateY(-100%);
+    color: #1E88E5;
+}
+
+.forget {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0 30px 0;
+    color: #000;
+}
+
+#remember {
+    accent-color: #1E88E5;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.forget label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #000;
+}
+
+.forget label p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.wrapper a {
+    color: #1E88E5;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.wrapper a:hover {
+    text-decoration: underline;
+    color: #0d47a1;
+}
+
+button {
+    background: linear-gradient(135deg, #1E88E5, #0d47a1);
     color: white;
     font-weight: 600;
-    transition: all 0.3s ease;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.3s ease;
 }
 
-.btn-login:hover {
+button:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
 }
 
-.login-card a {
-    color: #1E88E5;
-    font-weight: 500;
-    text-decoration: none;
+.register {
+    text-align: center;
+    margin-top: 30px;
+    color: #000;
 }
 
-.login-card a:hover {
-    color: #0d47a1;
-    text-decoration: underline;
+.register a {
+    color: #1E88E5;
+    font-weight: 500;
+}
+
+/* Make placeholder text black if needed */
+.input-field input::placeholder {
+    color: #666;
+    opacity: 0.7;
 }
 </style>
 {% endblock %}
